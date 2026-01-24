@@ -36,14 +36,14 @@ program
     });
 
 program
-    .command('sessions')
-    .description('List your local dev sessions')
+    .command('apps')
+    .description('List your local dev apps')
     .action(listSessions);
 
 program
-    .command('delete-session')
-    .description('Delete a local dev session')
-    .argument('<sessionId>', 'Session ID to delete')
+    .command('delete')
+    .description('Delete a local dev app')
+    .argument('<appId>', 'App ID to delete')
     .action(deleteSession);
 
 program.parse();

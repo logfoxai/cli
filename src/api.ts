@@ -57,14 +57,13 @@ async function apiCall<T>(method: string, body?: unknown): Promise<ApiResponse<T
 
 }
 
-export type LocalDevSession = {
+export type App = {
     id: string
     teamId: string
-    userId: string
-    label: string
-    appId: string
-    appName: string
+    name: string
+    createdByUserId?: string
     createdAt: string
+    updatedAt: string
 };
 
 export type Team = {
@@ -84,21 +83,21 @@ export async function getMyTeams(): Promise<ApiResponse<Team[]>> {
 
 }
 
-export async function createLocalDevSession(teamId: string, label: string): Promise<ApiResponse<LocalDevSession>> {
+export async function searchApps(params: {teamId: string; name?: string; createdByUserId?: string}): Promise<ApiResponse<App[]>> {
 
-    return apiCall('createLocalDevSession', {teamId, label});
-
-}
-
-export async function getLocalDevSessions(teamId: string): Promise<ApiResponse<LocalDevSession[]>> {
-
-    return apiCall('getLocalDevSessions', {teamId});
+    return apiCall('searchApps', params);
 
 }
 
-export async function deleteLocalDevSession(sessionId: string): Promise<ApiResponse<{success: boolean}>> {
+export async function createApp(params: {teamId: string; name: string}): Promise<ApiResponse<App>> {
 
-    return apiCall('deleteLocalDevSession', {sessionId});
+    return apiCall('createApp', params);
+
+}
+
+export async function deleteApp(appId: string, teamId: string): Promise<ApiResponse<void>> {
+
+    return apiCall('deleteApp', {appId, teamId});
 
 }
 

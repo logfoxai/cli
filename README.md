@@ -43,20 +43,20 @@ logspace run --name data-processor -- python main.py
 logspace run --name frontend -- npm start
 ```
 
-### View your sessions
+### View your local apps
 
-List all your active local dev sessions:
+List all your local dev apps:
 
 ```bash
-logspace sessions
+logspace apps
 ```
 
-### Delete a session
+### Delete a local app
 
-Delete a session and its associated logs:
+Delete a local app (logs will remain):
 
 ```bash
-logspace delete-session <sessionId>
+logspace delete <appId>
 ```
 
 ### Logout

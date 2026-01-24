@@ -1,8 +1,9 @@
 /* eslint-disable max-lines-per-function */
 import {spawn} from 'child_process';
+import {createHash} from 'crypto';
 import {getConfig} from '../config';
 import * as api from '../api';
-import type {LogEntry} from '../api';
+import type {LogEntry, App} from '../api';
 
 const BATCH_SIZE = 100;
 const FLUSH_INTERVAL_MS = 3000; // 3s
@@ -10,6 +11,12 @@ const FLUSH_INTERVAL_MS = 3000; // 3s
 type RunOptions = {
     name: string
 };
+
+function generateUserHash(userId: string): string {
+
+    return createHash('sha256').update(userId).digest('hex').slice(0, 4);
+
+}
 
 export async function run(command: string[], options: RunOptions): Promise<void> {
 
@@ -29,6 +36,13 @@ export async function run(command: string[], options: RunOptions): Promise<void>
 
     }
 
+    if (!config.userId) {
+
+        console.error('User ID not found. Run "logspace logout" then "logspace login" again.');
+        process.exit(1);
+
+    }
+
     if (!options.name) {
 
         console.error('Please provide an app name with --name');
@@ -44,21 +58,41 @@ export async function run(command: string[], options: RunOptions): Promise<void>
 
     }
 
-    // Create or get existing session
-    console.log(`Creating local dev session for "${options.name}"...`);
+    // Build deterministic app name: local-{hash}-{label}
+    const userHash = generateUserHash(config.userId);
+    const label = options.name.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    const appName = `local-${userHash}-${label}`;
 
-    const sessionResult = await api.createLocalDevSession(config.teamId, options.name);
+    console.log(`Setting up local app "${appName}"...`);
 
-    if (!sessionResult.ok) {
+    // Search for existing app
+    const searchResult = await api.searchApps({teamId: config.teamId, name: appName});
 
-        console.error('Failed to create session:', sessionResult.error);
-        process.exit(1);
+    let app: App;
+
+    if (searchResult.ok && searchResult.data.length > 0) {
+
+        app = searchResult.data[0];
+        console.log(`Found existing app: ${app.name}`);
+
+    } else {
+
+        // Create new app
+        const createResult = await api.createApp({teamId: config.teamId, name: appName});
+
+        if (!createResult.ok) {
+
+            console.error('Failed to create local app:', createResult.error);
+            process.exit(1);
+
+        }
+
+        app = createResult.data;
+        console.log(`Created new app: ${app.name}`);
 
     }
 
-    const session = sessionResult.data;
-    console.log(`Session created: ${session.appName}`);
-    console.log(`Logs will appear in Logspace under env "local", app "${session.appName}"`);
+    console.log(`Logs will appear in Logspace under env "local", app "${app.name}"`);
     console.log();
 
     // Start the child process
@@ -68,8 +102,8 @@ export async function run(command: string[], options: RunOptions): Promise<void>
         shell: true,
         env: {
             ...process.env,
-            LOGSPACE_SESSION_ID: session.id,
-            LOGSPACE_APP_NAME: session.appName,
+            LOGSPACE_APP_ID: app.id,
+            LOGSPACE_APP_NAME: app.name,
         },
     });
 
@@ -84,7 +118,7 @@ export async function run(command: string[], options: RunOptions): Promise<void>
         const logsToSend = logBuffer;
         logBuffer = [];
 
-        const result = await api.ingestLogs(config.teamId!, session.appId, 'local', logsToSend);
+        const result = await api.ingestLogs(config.teamId!, app.id, 'local', logsToSend);
 
         if (!result.ok) {
 

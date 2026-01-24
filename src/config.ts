@@ -9,6 +9,7 @@ export type Config = {
     authToken?: string
     apiUrl: string
     teamId?: string
+    userId?: string
 };
 
 const DEFAULT_CONFIG: Config = {

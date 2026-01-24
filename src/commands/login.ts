@@ -65,6 +65,7 @@ export async function login(): Promise<void> {
     if (result.ok) {
 
         console.log(`Logged in as ${result.data.email}`);
+        saveConfig({userId: result.data.id});
 
         // Get teams and save the first one as default
         const teamsResult = await api.getMyTeams();
