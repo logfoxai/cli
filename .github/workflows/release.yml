@@ -2,6 +2,7 @@ name: Release
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -10,10 +11,14 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: https://npm.pkg.github.com
+          scope: "@logspacehq"
       - run: npm ci
       - run: npm run build
       - run: npx autorel@^2
