@@ -82,12 +82,48 @@ The CLI attempts to parse log output intelligently:
 
 ## Configuration
 
-Configuration is stored in `~/.logspace/config.json`:
+Configuration is stored in `~/.logspace/config.json`.
+
+### View current config
+
+```bash
+logspace config
+```
+
+### Set config values
+
+```bash
+logspace config apiUrl <url>
+logspace config appUrl <url>
+```
+
+### Default values
+
+If no config file exists, these defaults are used:
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `apiUrl` | `https://api.logspace.sh/api` | Logspace API endpoint |
+| `appUrl` | `https://app.logspace.sh` | Logspace web app (for login) |
+
+### Config file structure
 
 ```json
 {
   "authToken": "your-auth-token",
   "apiUrl": "https://api.logspace.sh/api",
-  "teamId": "your-team-id"
+  "appUrl": "https://app.logspace.sh",
+  "teamId": "your-team-id",
+  "userId": "your-user-id"
 }
+```
+
+### Local development setup
+
+If you're running Logspace locally, configure the CLI to point to your local services:
+
+```bash
+logspace config apiUrl http://localhost:4000/api
+logspace config appUrl http://localhost:3000
+logspace login
 ```
