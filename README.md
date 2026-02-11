@@ -91,3 +91,4 @@ Configuration is stored in `~/.logspace/config.json`:
   "teamId": "your-team-id"
 }
 ```
+# test2
