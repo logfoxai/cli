@@ -8,12 +8,14 @@ const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json');
 export type Config = {
     authToken?: string
     apiUrl: string
+    appUrl: string
     teamId?: string
     userId?: string
 };
 
 const DEFAULT_CONFIG: Config = {
     apiUrl: 'https://api.logspace.sh/api',
+    appUrl: 'https://app.logspace.sh',
 };
 
 export function getConfig(): Config {

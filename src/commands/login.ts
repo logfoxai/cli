@@ -28,9 +28,7 @@ export async function login(): Promise<void> {
     console.log('(If browser does not open, visit the URL manually)');
     console.log();
 
-    // Determine the login URL based on API URL
-    const baseUrl = config.apiUrl.replace('/api', '');
-    const loginUrl = `${baseUrl}/cli-login?port=${AUTH_CALLBACK_PORT}`;
+    const loginUrl = `${config.appUrl}/cli-login?port=${AUTH_CALLBACK_PORT}`;
 
     console.log(`Login URL: ${loginUrl}`);
     console.log();
