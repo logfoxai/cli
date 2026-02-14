@@ -89,11 +89,15 @@ export async function login(): Promise<void> {
 
     }
 
+    process.exit(0);
+
 }
 
 function waitForAuthCallback(): Promise<string | null> {
 
     return new Promise((resolve) => {
+
+        let timeoutId: NodeJS.Timeout;
 
         const server = http.createServer((req, res) => {
 
@@ -114,6 +118,7 @@ function waitForAuthCallback(): Promise<string | null> {
                     </html>
                 `);
 
+                clearTimeout(timeoutId);
                 server.close();
                 resolve(token || null);
 
@@ -133,7 +138,7 @@ function waitForAuthCallback(): Promise<string | null> {
         });
 
         // Timeout after 5 minutes
-        setTimeout(() => {
+        timeoutId = setTimeout(() => {
 
             server.close();
             resolve(null);
