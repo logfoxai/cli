@@ -14,7 +14,7 @@ export type Config = {
 };
 
 const DEFAULT_CONFIG: Config = {
-    apiUrl: 'https://api.logspace.sh/api',
+    apiUrl: 'https://api.logspace.sh',
     appUrl: 'https://app.logspace.sh',
 };
 
