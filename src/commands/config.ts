@@ -11,7 +11,7 @@ export function showConfig(): void {
     console.log('  logspace config:set <key> <value>  Set a config value');
     console.log('  logspace config:reset              Reset to defaults');
     console.log();
-    console.log('Valid keys: apiUrl, appUrl');
+    console.log('Valid keys: apiUrl, appUrl, teamId');
 
 }
 
@@ -33,10 +33,10 @@ export function getConfigValue(key: string): void {
 
 export function setConfig(key: string, value: string): void {
 
-    if (key !== 'apiUrl' && key !== 'appUrl') {
+    if (key !== 'apiUrl' && key !== 'appUrl' && key !== 'teamId') {
 
         console.error(`Invalid config key: ${key}`);
-        console.log('Valid keys: apiUrl, appUrl');
+        console.log('Valid keys: apiUrl, appUrl, teamId');
         process.exit(1);
 
     }

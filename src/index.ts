@@ -5,6 +5,7 @@ import {login} from './commands/login';
 import {logout} from './commands/logout';
 import {run} from './commands/run';
 import {listSessions, deleteSession} from './commands/sessions';
+import {listTeams} from './commands/teams';
 import {showConfig, getConfigValue, setConfig, resetConfig} from './commands/config';
 
 const program = new Command();
@@ -35,6 +36,11 @@ program
         run(command, options);
 
     });
+
+program
+    .command('teams')
+    .description('List your teams')
+    .action(listTeams);
 
 program
     .command('apps')

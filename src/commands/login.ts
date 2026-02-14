@@ -72,7 +72,13 @@ export async function login(): Promise<void> {
 
             const team = teamsResult.data[0];
             saveConfig({teamId: team.id});
-            console.log(`Default team: ${team.name}`);
+            console.log(`Team: ${team.name}`);
+
+            if (teamsResult.data.length > 1) {
+
+                console.log(`(You have ${teamsResult.data.length} teams. Run "logspace teams" to see all.)`);
+
+            }
 
         }
 
