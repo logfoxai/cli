@@ -45,13 +45,32 @@ export async function listSessions(): Promise<void> {
 
     for (const app of localApps) {
 
-        const created = new Date(app.createdAt).toLocaleString();
+        const created = parseDate(app.createdAt);
         console.log(`  ${app.name}`);
         console.log(`    ID: ${app.id}`);
         console.log(`    Created: ${created}`);
         console.log();
 
     }
+
+}
+
+// Handle API date format: {__type: "Date", value: "..."}
+function parseDate(date: unknown): string {
+
+    if (typeof date === 'string') {
+
+        return new Date(date).toLocaleString();
+
+    }
+
+    if (date && typeof date === 'object' && '__type' in date && 'value' in date) {
+
+        return new Date((date as {value: string}).value).toLocaleString();
+
+    }
+
+    return 'Unknown';
 
 }
 
