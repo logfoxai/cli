@@ -7,6 +7,7 @@ import {run} from './commands/run';
 import {listSessions, deleteSession} from './commands/sessions';
 import {listTeams} from './commands/teams';
 import {showConfig, getConfigValue, setConfig, resetConfig} from './commands/config';
+import {showStatus} from './commands/status';
 
 const program = new Command();
 
@@ -24,6 +25,11 @@ program
     .command('logout')
     .description('Log out of Logspace')
     .action(logout);
+
+program
+    .command('status')
+    .description('Show current login status')
+    .action(showStatus);
 
 program
     .command('run')

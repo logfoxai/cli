@@ -63,7 +63,7 @@ export async function login(): Promise<void> {
     if (result.ok) {
 
         console.log(`Logged in as ${result.data.email}`);
-        saveConfig({userId: result.data.id});
+        saveConfig({userId: result.data.id, userEmail: result.data.email});
 
         // Get teams and save the first one as default
         const teamsResult = await api.getMyTeams();
@@ -71,7 +71,7 @@ export async function login(): Promise<void> {
         if (teamsResult.ok && teamsResult.data.length > 0) {
 
             const team = teamsResult.data[0];
-            saveConfig({teamId: team.id});
+            saveConfig({teamId: team.id, teamName: team.name});
             console.log(`Team: ${team.name}`);
 
             if (teamsResult.data.length > 1) {

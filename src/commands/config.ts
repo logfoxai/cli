@@ -1,4 +1,5 @@
 import {getConfig, saveConfig, clearConfig} from '../config';
+import * as api from '../api';
 
 export function showConfig(): void {
 
@@ -31,13 +32,39 @@ export function getConfigValue(key: string): void {
 
 }
 
-export function setConfig(key: string, value: string): void {
+export async function setConfig(key: string, value: string): Promise<void> {
 
     if (key !== 'apiUrl' && key !== 'appUrl' && key !== 'teamId') {
 
         console.error(`Invalid config key: ${key}`);
         console.log('Valid keys: apiUrl, appUrl, teamId');
         process.exit(1);
+
+    }
+
+    // If setting teamId, also fetch and save the team name
+    if (key === 'teamId') {
+
+        const teamsResult = await api.getMyTeams();
+
+        if (teamsResult.ok) {
+
+            const team = teamsResult.data.find(t => t.id === value);
+
+            if (team) {
+
+                saveConfig({teamId: value, teamName: team.name});
+                console.log(`Switched to team: ${team.name}`);
+                return;
+
+            }
+
+        }
+
+        // Fallback if we can't find the team name
+        saveConfig({teamId: value, teamName: undefined});
+        console.log(`Set teamId = ${value}`);
+        return;
 
     }
 
