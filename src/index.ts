@@ -5,7 +5,9 @@ import {login} from './commands/login';
 import {logout} from './commands/logout';
 import {run} from './commands/run';
 import {listSessions, deleteSession} from './commands/sessions';
-import {showConfig, setConfig} from './commands/config';
+import {listTeams} from './commands/teams';
+import {showConfig, getConfigValue, setConfig, resetConfig} from './commands/config';
+import {showStatus} from './commands/status';
 
 const program = new Command();
 
@@ -25,6 +27,11 @@ program
     .action(logout);
 
 program
+    .command('status')
+    .description('Show current login status')
+    .action(showStatus);
+
+program
     .command('run')
     .description('Run a command and send logs to Logspace')
     .requiredOption('-n, --name <name>', 'Name for this local app (e.g., "backend", "frontend")')
@@ -35,6 +42,11 @@ program
         run(command, options);
 
     });
+
+program
+    .command('teams')
+    .description('List your teams')
+    .action(listTeams);
 
 program
     .command('apps')
@@ -49,27 +61,22 @@ program
 
 program
     .command('config')
-    .description('Show or set configuration')
-    .argument('[key]', 'Config key to set (apiUrl or appUrl)')
-    .argument('[value]', 'Value to set')
-    .action((key?: string, value?: string) => {
+    .description('Show current configuration and available options')
+    .action(() => showConfig());
 
-        if (!key) {
+program
+    .command('config:get <key>')
+    .description('Get a config value')
+    .action((key: string) => getConfigValue(key));
 
-            showConfig();
+program
+    .command('config:set <key> <value>')
+    .description('Set a config value')
+    .action((key: string, value: string) => setConfig(key, value));
 
-        } else if (!value) {
-
-            console.error('Usage: logspace config <key> <value>');
-            console.log('Example: logspace config apiUrl http://localhost:4000/api');
-            process.exit(1);
-
-        } else {
-
-            setConfig(key, value);
-
-        }
-
-    });
+program
+    .command('config:reset')
+    .description('Reset configuration to defaults (production)')
+    .action(() => resetConfig());
 
 program.parse();

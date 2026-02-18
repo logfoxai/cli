@@ -236,6 +236,8 @@ export async function run(command: string[], options: RunOptions): Promise<void>
 
 function parseLogLine(line: string, isError: boolean): LogEntry {
 
+    const now = Date.now();
+
     // Try to parse as JSON first (for structured logging)
     try {
 
@@ -243,11 +245,14 @@ function parseLogLine(line: string, isError: boolean): LogEntry {
 
         if (typeof parsed === 'object' && parsed !== null) {
 
+            const rawLevel = parsed.level ?? parsed.severity ?? (isError ? 'error' : 'info');
+            const rawTime = parsed.time ?? parsed.timestamp;
+
             return {
-                level: parsed.level ?? parsed.severity ?? (isError ? 'error' : 'info'),
+                level: normalizeLevel(rawLevel, isError),
                 message: parsed.message ?? parsed.msg ?? line,
                 data: excludeKeys(parsed, ['level', 'severity', 'message', 'msg', 'time', 'timestamp']),
-                time: parsed.time ?? parsed.timestamp ?? new Date().toISOString(),
+                timestamp: normalizeTimestamp(rawTime) ?? now,
             };
 
         }
@@ -260,10 +265,50 @@ function parseLogLine(line: string, isError: boolean): LogEntry {
     const level = detectLogLevel(line, isError);
 
     return {
-        level,
+        level: normalizeLevel(level, isError),
         message: line,
-        time: new Date().toISOString(),
+        timestamp: now,
     };
+
+}
+
+// Convert level to numeric value (matches standard syslog/bunyan levels)
+function normalizeLevel(level: unknown, isError: boolean): number {
+
+    if (typeof level === 'number') return level;
+
+    const str = String(level).toLowerCase();
+
+    if (str === 'trace') return 10;
+    if (str === 'debug') return 20;
+    if (str === 'info') return 30;
+    if (str === 'warn' || str === 'warning') return 40;
+    if (str === 'error' || str === 'err') return 50;
+    if (str === 'fatal' || str === 'panic') return 60;
+
+    return isError ? 50 : 30;
+
+}
+
+// Convert timestamp to unix milliseconds
+function normalizeTimestamp(time: unknown): number | undefined {
+
+    if (typeof time === 'number') {
+
+        // If looks like seconds, convert to ms
+        if (time < 1e12) return time * 1000;
+        return time;
+
+    }
+
+    if (typeof time === 'string') {
+
+        const ms = Date.parse(time);
+        if (!isNaN(ms)) return ms;
+
+    }
+
+    return undefined;
 
 }
 

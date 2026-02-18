@@ -20,16 +20,14 @@ async function apiCall<T>(method: string, body?: unknown): Promise<ApiResponse<T
 
     try {
 
-        const response = await fetch(config.apiUrl, {
+        // express-typed-rpc expects method name in URL path, args as body
+        const response = await fetch(`${config.apiUrl}/api/${method}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${config.authToken}`,
             },
-            body: JSON.stringify({
-                method,
-                args: body ? [body] : [],
-            }),
+            body: JSON.stringify(body ?? {}),
         });
 
         if (!response.ok) {
@@ -39,15 +37,15 @@ async function apiCall<T>(method: string, body?: unknown): Promise<ApiResponse<T
 
         }
 
-        const data = await response.json() as {error?: {message?: string}; result?: T};
+        const data = await response.json() as T & {error?: {message?: string}};
 
-        if (data.error) {
+        if ('error' in data && data.error) {
 
             return {ok: false, error: data.error.message || String(data.error)};
 
         }
 
-        return {ok: true, data: data.result as T};
+        return {ok: true, data};
 
     } catch (err) {
 
@@ -62,8 +60,8 @@ export type App = {
     teamId: string
     name: string
     createdByUserId?: string
-    createdAt: string
-    updatedAt: string
+    createdAt: string | {__type: string; value: string}
+    updatedAt: string | {__type: string; value: string}
 };
 
 export type Team = {
@@ -73,7 +71,11 @@ export type Team = {
 
 export async function whoami(): Promise<ApiResponse<{id: string; email: string}>> {
 
-    return apiCall('whoami');
+    const result = await apiCall<{user: {id: string; email: string}}>('whoami');
+
+    if (!result.ok) return result;
+
+    return {ok: true, data: result.data.user};
 
 }
 
@@ -102,10 +104,10 @@ export async function deleteApp(appId: string, teamId: string): Promise<ApiRespo
 }
 
 export type LogEntry = {
-    level?: number | string
-    message?: string
+    timestamp: number
+    level?: number
+    message: string
     data?: Record<string, unknown>
-    time?: string
 };
 
 export async function ingestLogs(teamId: string, appId: string, env: string, logs: LogEntry[]): Promise<ApiResponse<{

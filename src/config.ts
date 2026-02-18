@@ -10,11 +10,13 @@ export type Config = {
     apiUrl: string
     appUrl: string
     teamId?: string
+    teamName?: string
     userId?: string
+    userEmail?: string
 };
 
 const DEFAULT_CONFIG: Config = {
-    apiUrl: 'https://api.logspace.sh/api',
+    apiUrl: 'https://api.logspace.sh',
     appUrl: 'https://app.logspace.sh',
 };
 

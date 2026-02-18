@@ -63,7 +63,7 @@ export async function login(): Promise<void> {
     if (result.ok) {
 
         console.log(`Logged in as ${result.data.email}`);
-        saveConfig({userId: result.data.id});
+        saveConfig({userId: result.data.id, userEmail: result.data.email});
 
         // Get teams and save the first one as default
         const teamsResult = await api.getMyTeams();
@@ -71,8 +71,14 @@ export async function login(): Promise<void> {
         if (teamsResult.ok && teamsResult.data.length > 0) {
 
             const team = teamsResult.data[0];
-            saveConfig({teamId: team.id});
-            console.log(`Default team: ${team.name}`);
+            saveConfig({teamId: team.id, teamName: team.name});
+            console.log(`Team: ${team.name}`);
+
+            if (teamsResult.data.length > 1) {
+
+                console.log(`(You have ${teamsResult.data.length} teams. Run "logspace teams" to see all.)`);
+
+            }
 
         }
 
@@ -83,11 +89,15 @@ export async function login(): Promise<void> {
 
     }
 
+    process.exit(0);
+
 }
 
 function waitForAuthCallback(): Promise<string | null> {
 
     return new Promise((resolve) => {
+
+        let timeoutId: NodeJS.Timeout;
 
         const server = http.createServer((req, res) => {
 
@@ -108,6 +118,7 @@ function waitForAuthCallback(): Promise<string | null> {
                     </html>
                 `);
 
+                clearTimeout(timeoutId);
                 server.close();
                 resolve(token || null);
 
@@ -127,7 +138,7 @@ function waitForAuthCallback(): Promise<string | null> {
         });
 
         // Timeout after 5 minutes
-        setTimeout(() => {
+        timeoutId = setTimeout(() => {
 
             server.close();
             resolve(null);
