@@ -8,122 +8,50 @@ CLI tool for sending local development logs to Logspace.
 npm install -g @logspacehq/cli
 ```
 
-## Usage
-
-### Login
-
-First, authenticate with your Logspace account:
+## Quick Start
 
 ```bash
+# Authenticate
 logspace login
+
+# Run your app with logging
+logspace run --name my-app -- npm start
 ```
 
-This will open a browser window for you to log in. Once authenticated, you can close the browser and return to the terminal.
+Logs appear in Logspace under environment "local".
 
-### Run a command
+## Commands
 
-Run any command and have its output sent to Logspace:
+Run `logspace --help` to see all available commands.
 
-```bash
-logspace run --name my-backend -- npm start
-```
+## How it Works
 
-The `--name` flag specifies the name of your local app. This helps you identify which app the logs are coming from in the Logspace dashboard.
+1. `logspace run` wraps your command and captures stdout/stderr
+2. Logs are parsed (JSON or plain text) and batched
+3. Sent to Logspace under environment "local" with app name `local-{hash}-{name}`
+4. Issues are detected and grouped just like production logs
 
-Examples:
+### Log Parsing
 
-```bash
-# Run a Node.js server
-logspace run --name api-server -- npm run dev
-
-# Run a Python script
-logspace run --name data-processor -- python main.py
-
-# Run with environment variables
-logspace run --name frontend -- npm start
-```
-
-### View your local apps
-
-List all your local dev apps:
-
-```bash
-logspace apps
-```
-
-### Delete a local app
-
-Delete a local app (logs will remain):
-
-```bash
-logspace delete <appId>
-```
-
-### Logout
-
-```bash
-logspace logout
-```
-
-## How it works
-
-1. When you run `logspace run`, the CLI creates a local dev session with a unique app name (e.g., `local-backend-a1b2c3`)
-2. Your command is spawned as a child process
-3. stdout and stderr are captured, parsed, and sent to Logspace
-4. Logs appear in the Logspace dashboard under environment "local"
-5. Issues are detected and grouped just like production logs
-
-## Log parsing
-
-The CLI attempts to parse log output intelligently:
-
-- **JSON logs**: If your app outputs JSON logs (like pino, winston, bunyan), the CLI will parse the structure and extract level, message, and additional data
-- **Plain text**: For plain text logs, the CLI detects log levels from common patterns (ERROR, WARN, INFO, DEBUG)
+- **JSON logs** (pino, winston, bunyan): Structure is extracted automatically
+- **Plain text**: Log levels detected from common patterns (ERROR, WARN, INFO, DEBUG)
 
 ## Configuration
 
-Configuration is stored in `~/.logspace/config.json`.
-
-### View current config
-
-```bash
-logspace config
-```
-
-### Set config values
-
-```bash
-logspace config apiUrl <url>
-logspace config appUrl <url>
-```
-
-### Default values
-
-If no config file exists, these defaults are used:
+Config is stored in `~/.logspace/config.json`. Use `logspace config` to view current settings.
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `apiUrl` | `https://api.logspace.sh/api` | Logspace API endpoint |
+| `apiUrl` | `https://api.logspace.sh` | Logspace API endpoint |
 | `appUrl` | `https://app.logspace.sh` | Logspace web app (for login) |
+| `teamId` | (from login) | Active team |
 
-### Config file structure
+### Local Development
 
-```json
-{
-  "authToken": "your-auth-token",
-  "apiUrl": "https://api.logspace.sh/api",
-  "appUrl": "https://app.logspace.sh",
-  "teamId": "your-team-id",
-  "userId": "your-user-id"
-}
-```
-
-### Local development setup
-
-If you're running Logspace locally, configure the CLI to point to your local services:
+To point the CLI at local services:
 
 ```bash
-logspace config apiUrl http://localhost:4000/api
-logspace config appUrl http://localhost:3000
+logspace config:set apiUrl http://localhost:3000
+logspace config:set appUrl http://localhost:4000
 logspace login
 ```
