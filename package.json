@@ -1,7 +1,7 @@
 {
-  "name": "@logspacehq/cli",
+  "name": "@logfoxai/cli",
   "version": "0.0.1",
-  "description": "Logspace CLI for local development logging",
+  "description": "Logfox CLI for local development logging",
   "main": "dist/index.js",
   "bin": {
     "logspace": "./dist/index.js"
@@ -11,7 +11,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/logspacehq/cli.git"
+    "url": "git+https://github.com/logfoxai/cli.git"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
