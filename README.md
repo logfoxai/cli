@@ -1,16 +1,16 @@
-# @logspacehq/cli
+# @logfoxai/cli
 
-[![build status](https://github.com/logspacehq/cli/actions/workflows/release.yml/badge.svg)](https://github.com/logspacehq/cli/actions)
+[![build status](https://github.com/logfoxai/cli/actions/workflows/release.yml/badge.svg)](https://github.com/logfoxai/cli/actions)
 [![SemVer](https://img.shields.io/badge/SemVer-2.0.0-blue)]()
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![AutoRel](https://img.shields.io/badge/v2-AutoRel?label=AutoRel&labelColor=0ab5fc&color=grey&link=https%3A%2F%2Fgithub.com%2Fmhweiner%2Fautorel)](https://github.com/mhweiner/autorel)
 
-CLI tool for sending local development logs to Logspace.
+CLI tool for sending local development logs to Logfox.
 
 ## Installation
 
 ```bash
-npm install -g @logspacehq/cli
+npm install -g @logfoxai/cli
 ```
 
 ## Quick Start
@@ -23,7 +23,7 @@ logspace login
 logspace run --name my-app -- npm start
 ```
 
-Logs appear in Logspace under environment "local".
+Logs appear in Logfox under environment "local".
 
 ## Commands
 
@@ -33,7 +33,7 @@ Run `logspace --help` to see all available commands.
 
 1. `logspace run` wraps your command and captures stdout/stderr
 2. Logs are parsed (JSON or plain text) and batched
-3. Sent to Logspace under environment "local" with app name `local-{hash}-{name}`
+3. Sent to Logfox under environment "local" with app name `local-{hash}-{name}`
 4. Issues are detected and grouped just like production logs
 
 ### Log Parsing
@@ -43,12 +43,12 @@ Run `logspace --help` to see all available commands.
 
 ## Configuration
 
-Config is stored in `~/.logspace/config.json`. Use `logspace config` to view current settings.
+Config is stored in `~/.logfox/config.json`. Use `logspace config` to view current settings.
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `apiUrl` | `https://api.logspace.sh` | Logspace API endpoint |
-| `appUrl` | `https://app.logspace.sh` | Logspace web app (for login) |
+| `apiUrl` | `https://api.logfox.ai` | Logfox API endpoint |
+| `appUrl` | `https://app.logfox.ai` | Logfox web app (for login) |
 | `teamId` | (from login) | Active team |
 
 ### Local Development
