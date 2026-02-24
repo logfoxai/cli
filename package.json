@@ -1,5 +1,5 @@
 {
-  "name": "@logfoxai/cli",
+  "name": "@logfox/cli",
   "version": "0.0.1",
   "description": "Logfox CLI for local development logging",
   "main": "dist/index.js",
@@ -14,7 +14,8 @@
     "url": "git+https://github.com/logfoxai/cli.git"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
   },
   "scripts": {
     "build": "tsc",

@@ -1,4 +1,4 @@
-# @logfoxai/cli
+# @logfox/cli
 
 [![build status](https://github.com/logfoxai/cli/actions/workflows/release.yml/badge.svg)](https://github.com/logfoxai/cli/actions)
 [![SemVer](https://img.shields.io/badge/SemVer-2.0.0-blue)]()
@@ -10,7 +10,7 @@ CLI tool for sending local development logs to Logfox.
 ## Installation
 
 ```bash
-npm install -g @logfoxai/cli
+npm install -g @logfox/cli
 ```
 
 ## Quick Start
