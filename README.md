@@ -1,4 +1,4 @@
-# @logfoxai/cli
+# @logfox/cli
 
 [![build status](https://github.com/logfoxai/cli/actions/workflows/release.yml/badge.svg)](https://github.com/logfoxai/cli/actions)
 [![SemVer](https://img.shields.io/badge/SemVer-2.0.0-blue)]()
@@ -10,28 +10,28 @@ CLI tool for sending local development logs to Logfox.
 ## Installation
 
 ```bash
-npm install -g @logfoxai/cli
+npm install -g @logfox/cli
 ```
 
 ## Quick Start
 
 ```bash
 # Authenticate
-logspace login
+logfox login
 
 # Run your app with logging
-logspace run --name my-app -- npm start
+logfox run --name my-app -- npm start
 ```
 
 Logs appear in Logfox under environment "local".
 
 ## Commands
 
-Run `logspace --help` to see all available commands.
+Run `logfox --help` to see all available commands.
 
 ## How it Works
 
-1. `logspace run` wraps your command and captures stdout/stderr
+1. `logfox run` wraps your command and captures stdout/stderr
 2. Logs are parsed (JSON or plain text) and batched
 3. Sent to Logfox under environment "local" with app name `local-{hash}-{name}`
 4. Issues are detected and grouped just like production logs
@@ -43,7 +43,7 @@ Run `logspace --help` to see all available commands.
 
 ## Configuration
 
-Config is stored in `~/.logfox/config.json`. Use `logspace config` to view current settings.
+Config is stored in `~/.logfox/config.json`. Use `logfox config` to view current settings.
 
 | Key | Default | Description |
 |-----|---------|-------------|
@@ -56,7 +56,7 @@ Config is stored in `~/.logfox/config.json`. Use `logspace config` to view curre
 To point the CLI at local services:
 
 ```bash
-logspace config:set apiUrl http://localhost:3000
-logspace config:set appUrl http://localhost:4000
-logspace login
+logfox config:set apiUrl http://localhost:3000
+logfox config:set appUrl http://localhost:4000
+logfox login
 ```
