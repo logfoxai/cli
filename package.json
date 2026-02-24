@@ -2,9 +2,9 @@
   "name": "@logfox/cli",
   "version": "0.0.1",
   "description": "Logfox CLI for local development logging",
-  "main": "dist/index.js",
+  "main": "./dist/index.js",
   "bin": {
-    "logspace": "./dist/index.js"
+    "logfox": "dist/index.js"
   },
   "files": [
     "dist"
