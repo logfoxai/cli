@@ -7,14 +7,14 @@ export async function listSessions(): Promise<void> {
 
     if (!config.teamId) {
 
-        console.error('No team configured. Run "logspace login" first.');
+        console.error('No team configured. Run "logfox login" first.');
         process.exit(1);
 
     }
 
     if (!config.userId) {
 
-        console.error('User ID not found. Run "logspace logout" then "logspace login" again.');
+        console.error('User ID not found. Run "logfox logout" then "logfox login" again.');
         process.exit(1);
 
     }
@@ -35,7 +35,7 @@ export async function listSessions(): Promise<void> {
     if (localApps.length === 0) {
 
         console.log('No local dev apps found.');
-        console.log('Create one with: logspace run --name <app-name> -- <command>');
+        console.log('Create one with: logfox run --name <app-name> -- <command>');
         return;
 
     }
@@ -80,7 +80,7 @@ export async function deleteSession(appId: string): Promise<void> {
 
     if (!config.teamId) {
 
-        console.error('No team configured. Run "logspace login" first.');
+        console.error('No team configured. Run "logfox login" first.');
         process.exit(1);
 
     }

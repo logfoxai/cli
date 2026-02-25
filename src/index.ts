@@ -8,22 +8,25 @@ import {listSessions, deleteSession} from './commands/sessions';
 import {listTeams} from './commands/teams';
 import {showConfig, getConfigValue, setConfig, resetConfig} from './commands/config';
 import {showStatus} from './commands/status';
+import {setupCloudwatch} from './commands/setup-cloudwatch';
+import {updateCloudwatch} from './commands/update-cloudwatch';
+import {cloudwatchRemove} from './commands/cloudwatch-remove';
 
 const program = new Command();
 
 program
-    .name('logspace')
-    .description('Logspace CLI for local development logging')
+    .name('logfox')
+    .description('Logfox CLI for log collection and local development')
     .version('0.0.1');
 
 program
     .command('login')
-    .description('Log in to Logspace')
+    .description('Log in to Logfox')
     .action(login);
 
 program
     .command('logout')
-    .description('Log out of Logspace')
+    .description('Log out of Logfox')
     .action(logout);
 
 program
@@ -33,13 +36,14 @@ program
 
 program
     .command('run')
-    .description('Run a command and send logs to Logspace')
-    .requiredOption('-n, --name <name>', 'Name for this local app (e.g., "backend", "frontend")')
+    .description('Run a command and send logs to Logfox')
+    .requiredOption('-n, --name <name>', 'Name for this app (e.g., "backend", "api")')
+    .option('-e, --env <env>', 'Environment (default: local)', 'local')
     .argument('<command...>', 'Command to run')
     .allowExcessArguments(true)
-    .action((command: string[], options: {name: string}) => {
+    .action((command: string[], options: {name: string; env: string}) => {
 
-        run(command, options);
+        void run(command, options);
 
     });
 
@@ -78,5 +82,31 @@ program
     .command('config:reset')
     .description('Reset configuration to defaults (production)')
     .action(() => resetConfig());
+
+// CloudWatch commands
+const setupCmd = program
+    .command('setup')
+    .description('Setup integrations');
+
+setupCmd
+    .command('cloudwatch')
+    .description('Setup CloudWatch log forwarding to Logfox')
+    .action(() => void setupCloudwatch());
+
+const updateCmd = program
+    .command('update')
+    .description('Update integrations');
+
+updateCmd
+    .command('cloudwatch')
+    .description('Update the Logfox Forwarder Lambda to the latest version')
+    .action(() => void updateCloudwatch());
+
+program
+    .command('cloudwatch')
+    .description('CloudWatch management commands')
+    .command('remove')
+    .description('Remove CloudWatch subscription filters')
+    .action(() => void cloudwatchRemove());
 
 program.parse();

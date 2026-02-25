@@ -7,7 +7,7 @@ export async function listTeams(): Promise<void> {
 
     if (!config.authToken) {
 
-        console.error('Not logged in. Run "logspace login" first.');
+        console.error('Not logged in. Run "logfox login" first.');
         process.exit(1);
 
     }
@@ -40,6 +40,6 @@ export async function listTeams(): Promise<void> {
 
     }
 
-    console.log('To switch teams: logspace config:set teamId <id>');
+    console.log('To switch teams: logfox config:set teamId <id>');
 
 }

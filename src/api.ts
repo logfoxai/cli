@@ -14,7 +14,7 @@ async function apiCall<T>(method: string, body?: unknown): Promise<ApiResponse<T
 
     if (!config.authToken) {
 
-        return {ok: false, error: 'Not logged in. Run: logspace login'};
+        return {ok: false, error: 'Not logged in. Run: logfox login'};
 
     }
 
@@ -110,11 +110,63 @@ export type LogEntry = {
     data?: Record<string, unknown>
 };
 
+export type Collector = 'cli' | 'cloudwatch-logs' | 'sdk' | 'vercel' | 'fluentbit';
+
 export async function ingestLogs(teamId: string, appId: string, env: string, logs: LogEntry[]): Promise<ApiResponse<{
     success: boolean
     logsIngested: number
 }>> {
 
     return apiCall('ingestLogs', {teamId, appId, env, logs});
+
+}
+
+/**
+ * Ingest logs via the new /v1/ingest endpoint using API key authentication.
+ * This is the preferred method for all log ingestion going forward.
+ */
+export async function ingestLogsV1(
+    apiKey: string,
+    appId: string,
+    env: string,
+    collector: Collector,
+    logs: LogEntry[],
+): Promise<ApiResponse<{success: boolean; logsIngested: number}>> {
+
+    const config = getConfig();
+
+    try {
+
+        const response = await fetch(`${config.apiUrl}/v1/ingest`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({appId, env, collector, logs}),
+        });
+
+        if (!response.ok) {
+
+            const text = await response.text();
+            return {ok: false, error: `API error: ${response.status} ${text}`};
+
+        }
+
+        const data = await response.json() as {success: boolean; logsIngested: number; error?: string};
+
+        if ('error' in data && data.error) {
+
+            return {ok: false, error: data.error};
+
+        }
+
+        return {ok: true, data};
+
+    } catch (err) {
+
+        return {ok: false, error: `Request failed: ${err}`};
+
+    }
 
 }

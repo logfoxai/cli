@@ -8,11 +8,11 @@ export function showConfig(): void {
     console.log(JSON.stringify(config, null, 2));
     console.log();
     console.log('Commands:');
-    console.log('  logspace config:get <key>          Get a config value');
-    console.log('  logspace config:set <key> <value>  Set a config value');
-    console.log('  logspace config:reset              Reset to defaults');
+    console.log('  logfox config:get <key>          Get a config value');
+    console.log('  logfox config:set <key> <value>  Set a config value');
+    console.log('  logfox config:reset              Reset to defaults');
     console.log();
-    console.log('Valid keys: apiUrl, appUrl, teamId');
+    console.log('Valid keys: apiUrl, appUrl, teamId, apiKey');
 
 }
 
@@ -34,11 +34,20 @@ export function getConfigValue(key: string): void {
 
 export async function setConfig(key: string, value: string): Promise<void> {
 
-    if (key !== 'apiUrl' && key !== 'appUrl' && key !== 'teamId') {
+    if (key !== 'apiUrl' && key !== 'appUrl' && key !== 'teamId' && key !== 'apiKey') {
 
         console.error(`Invalid config key: ${key}`);
-        console.log('Valid keys: apiUrl, appUrl, teamId');
+        console.log('Valid keys: apiUrl, appUrl, teamId, apiKey');
         process.exit(1);
+
+    }
+
+    // If setting apiKey, just save it directly
+    if (key === 'apiKey') {
+
+        saveConfig({apiKey: value});
+        console.log('API key saved.');
+        return;
 
     }
 

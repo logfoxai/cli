@@ -29,6 +29,11 @@
     "typescript": "5.8.3"
   },
   "dependencies": {
+    "@aws-sdk/client-cloudwatch-logs": "3.997.0",
+    "@aws-sdk/client-iam": "3.997.0",
+    "@aws-sdk/client-lambda": "3.997.0",
+    "@aws-sdk/client-sts": "3.997.0",
+    "@inquirer/prompts": "8.3.0",
     "commander": "12.1.0",
     "open": "10.1.0"
   }

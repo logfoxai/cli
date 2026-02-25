@@ -10,6 +10,7 @@ const FLUSH_INTERVAL_MS = 3000; // 3s
 
 type RunOptions = {
     name: string
+    env: string
 };
 
 function generateUserHash(userId: string): string {
@@ -21,25 +22,43 @@ function generateUserHash(userId: string): string {
 export async function run(command: string[], options: RunOptions): Promise<void> {
 
     const config = getConfig();
+    const env = options.env || 'local';
+    const isLocal = env === 'local';
 
-    if (!config.authToken) {
+    // For non-local environments, we require API key auth
+    if (!isLocal) {
 
-        console.error('Not logged in. Run "logspace login" first.');
-        process.exit(1);
+        if (!config.apiKey) {
 
-    }
+            console.error('API key not configured. Run "logfox config:set apiKey <your-api-key>" first.');
+            console.error('You can find your API key in the Logfox dashboard under Settings.');
+            process.exit(1);
 
-    if (!config.teamId) {
+        }
 
-        console.error('No team configured. Run "logspace login" first.');
-        process.exit(1);
+    } else {
 
-    }
+        // For local, we still support the old auth token flow
+        if (!config.authToken) {
 
-    if (!config.userId) {
+            console.error('Not logged in. Run "logfox login" first.');
+            process.exit(1);
 
-        console.error('User ID not found. Run "logspace logout" then "logspace login" again.');
-        process.exit(1);
+        }
+
+        if (!config.teamId) {
+
+            console.error('No team configured. Run "logfox login" first.');
+            process.exit(1);
+
+        }
+
+        if (!config.userId) {
+
+            console.error('User ID not found. Run "logfox logout" then "logfox login" again.');
+            process.exit(1);
+
+        }
 
     }
 
@@ -53,46 +72,61 @@ export async function run(command: string[], options: RunOptions): Promise<void>
     if (command.length === 0) {
 
         console.error('Please provide a command to run');
-        console.error('Example: logspace run --name my-app -- npm start');
+        console.error('Example: logfox run --name my-app -- npm start');
         process.exit(1);
 
     }
 
-    // Build deterministic app name: local-{hash}-{label}
-    const userHash = generateUserHash(config.userId);
+    // Build app name - for local, use deterministic name with user hash
     const label = options.name.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-    const appName = `local-${userHash}-${label}`;
+    let appName: string;
 
-    console.log(`Setting up local app "${appName}"...`);
+    if (isLocal && config.userId) {
 
-    // Search for existing app
-    const searchResult = await api.searchApps({teamId: config.teamId, name: appName});
-
-    let app: App;
-
-    if (searchResult.ok && searchResult.data.length > 0) {
-
-        app = searchResult.data[0];
-        console.log(`Found existing app: ${app.name}`);
+        const userHash = generateUserHash(config.userId);
+        appName = `local-${userHash}-${label}`;
 
     } else {
 
-        // Create new app
-        const createResult = await api.createApp({teamId: config.teamId, name: appName});
-
-        if (!createResult.ok) {
-
-            console.error('Failed to create local app:', createResult.error);
-            process.exit(1);
-
-        }
-
-        app = createResult.data;
-        console.log(`Created new app: ${app.name}`);
+        appName = label;
 
     }
 
-    console.log(`Logs will appear in Logspace under env "local", app "${app.name}"`);
+    console.log(`Setting up app "${appName}" for env "${env}"...`);
+
+    // For local env with auth token, create/find app via API
+    let app: App | undefined;
+
+    if (isLocal && config.teamId) {
+
+        // Search for existing app
+        const searchResult = await api.searchApps({teamId: config.teamId, name: appName});
+
+        if (searchResult.ok && searchResult.data.length > 0) {
+
+            app = searchResult.data[0];
+            console.log(`Found existing app: ${app.name}`);
+
+        } else {
+
+            // Create new app
+            const createResult = await api.createApp({teamId: config.teamId, name: appName});
+
+            if (!createResult.ok) {
+
+                console.error('Failed to create local app:', createResult.error);
+                process.exit(1);
+
+            }
+
+            app = createResult.data;
+            console.log(`Created new app: ${app.name}`);
+
+        }
+
+    }
+
+    console.log(`Logs will appear in Logfox under env "${env}", app "${appName}"`);
     console.log();
 
     // Start the child process
@@ -102,8 +136,9 @@ export async function run(command: string[], options: RunOptions): Promise<void>
         shell: true,
         env: {
             ...process.env,
-            LOGSPACE_APP_ID: app.id,
-            LOGSPACE_APP_NAME: app.name,
+            LOGFOX_APP_ID: app?.id || appName,
+            LOGFOX_APP_NAME: appName,
+            LOGFOX_ENV: env,
         },
     });
 
@@ -118,11 +153,27 @@ export async function run(command: string[], options: RunOptions): Promise<void>
         const logsToSend = logBuffer;
         logBuffer = [];
 
-        const result = await api.ingestLogs(config.teamId!, app.id, 'local', logsToSend);
+        // Use API key auth for non-local, or if API key is available
+        if (config.apiKey) {
 
-        if (!result.ok) {
+            const result = await api.ingestLogsV1(config.apiKey, appName, env, 'cli', logsToSend);
 
-            console.error(`[logspace] Failed to send logs: ${result.error}`);
+            if (!result.ok) {
+
+                console.error(`[logfox] Failed to send logs: ${result.error}`);
+
+            }
+
+        } else if (isLocal && config.teamId && app) {
+
+            // Fall back to old auth token method for local
+            const result = await api.ingestLogs(config.teamId, app.id, 'local', logsToSend);
+
+            if (!result.ok) {
+
+                console.error(`[logfox] Failed to send logs: ${result.error}`);
+
+            }
 
         }
 
@@ -161,7 +212,7 @@ export async function run(command: string[], options: RunOptions): Promise<void>
         // Flush if buffer is full
         if (logBuffer.length >= BATCH_SIZE) {
 
-            flushLogs();
+            void flushLogs();
 
         } else {
 
