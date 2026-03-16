@@ -17,7 +17,7 @@ export async function login(): Promise<void> {
         if (result.ok) {
 
             console.log(`Already logged in as ${result.data.email}`);
-            console.log('Run "logspace logout" to sign out first.');
+            console.log('Run "logfox logout" to sign out first.');
             return;
 
         }
@@ -76,7 +76,7 @@ export async function login(): Promise<void> {
 
             if (teamsResult.data.length > 1) {
 
-                console.log(`(You have ${teamsResult.data.length} teams. Run "logspace teams" to see all.)`);
+                console.log(`(You have ${teamsResult.data.length} teams. Run "logfox teams" to see all.)`);
 
             }
 
@@ -110,7 +110,7 @@ function waitForAuthCallback(): Promise<string | null> {
                 res.writeHead(200, {'Content-Type': 'text/html'});
                 res.end(`
                     <html>
-                    <head><title>Logspace CLI</title></head>
+                    <head><title>Logfox CLI</title></head>
                     <body style="font-family: system-ui; text-align: center; padding: 50px;">
                         <h1>Login Successful!</h1>
                         <p>You can close this window and return to the terminal.</p>

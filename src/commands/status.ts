@@ -7,7 +7,7 @@ export function showStatus(): void {
     if (!config.authToken) {
 
         console.log('Not logged in.');
-        console.log('Run "logspace login" to authenticate.');
+        console.log('Run "logfox login" to authenticate.');
         return;
 
     }
