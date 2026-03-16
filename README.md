@@ -7,6 +7,8 @@
 
 CLI tool for sending local development logs to Logfox.
 
+**npm setup:** Uses private `@logfoxai` packages. See [home](https://github.com/logfoxai/home#npm--github-packages-setup) for the one-time npm + gh auth setup.
+
 ## Installation
 
 ```bash
