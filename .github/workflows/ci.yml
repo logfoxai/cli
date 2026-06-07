@@ -25,7 +25,5 @@ jobs:
         run: |
           echo "@logfoxai:registry=https://npm.pkg.github.com/" > .npmrc
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
-      - name: Install deps
-        run: npm ci
-      - name: Validate
-        run: npm run validate
+      - run: npm ci
+      - run: npm run build
