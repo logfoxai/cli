@@ -21,7 +21,7 @@ async function apiCall<T>(method: string, body?: unknown): Promise<ApiResponse<T
     try {
 
         // express-typed-rpc expects method name in URL path, args as body
-        const response = await fetch(`${config.apiUrl}/api/${method}`, {
+        const response = await fetch(`${config.apiUrl}/v1/${method}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
