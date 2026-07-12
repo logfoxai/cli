@@ -62,3 +62,7 @@ logfox config:set apiUrl http://localhost:3000
 logfox config:set appUrl http://localhost:4000
 logfox login
 ```
+
+## Commits & releases
+
+[AutoRel](https://github.com/mhweiner/autorel). Conventional commits — see the [commit format](https://github.com/mhweiner/autorel/blob/main/docs/commit-format.md).
