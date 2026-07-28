@@ -21,7 +21,8 @@
     "build": "tsc",
     "dev": "tsx src/index.ts",
     "start": "node dist/index.js",
-    "validate": "npm run build"
+    "validate": "npm run check:package-json && npm run build",
+    "check:package-json": "node scripts/check-no-file-deps.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.13.2",
