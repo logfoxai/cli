@@ -263,7 +263,7 @@ export async function setupCloudwatch(): Promise<void> {
     }
 
     const lambdaEnv = {
-        LOGFOX_ENDPOINT: `${config.apiUrl}/v1/ingest`,
+        LOGFOX_ENDPOINT: `${config.apiUrl}/v1/ingestLogs`,
         LOGFOX_API_KEY: apiKey,
         LOG_GROUP_MAPPINGS: JSON.stringify(logGroupMappings),
     };

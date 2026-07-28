@@ -153,27 +153,20 @@ export async function run(command: string[], options: RunOptions): Promise<void>
         const logsToSend = logBuffer;
         logBuffer = [];
 
-        // Use API key auth for non-local, or if API key is available
-        if (config.apiKey) {
+        const appId = app?.id;
 
-            const result = await api.ingestLogsV1(config.apiKey, appName, env, 'cli', logsToSend);
+        if (!appId) {
 
-            if (!result.ok) {
+            console.error('[logfox] Cannot ingest logs without an app id');
+            return;
 
-                console.error(`[logfox] Failed to send logs: ${result.error}`);
+        }
 
-            }
+        const result = await api.ingestLogs(appId, env, logsToSend, 'cli');
 
-        } else if (isLocal && config.teamId && app) {
+        if (!result.ok) {
 
-            // Fall back to old auth token method for local
-            const result = await api.ingestLogs(config.teamId, app.id, 'local', logsToSend);
-
-            if (!result.ok) {
-
-                console.error(`[logfox] Failed to send logs: ${result.error}`);
-
-            }
+            console.error(`[logfox] Failed to send logs: ${result.error}`);
 
         }
 
