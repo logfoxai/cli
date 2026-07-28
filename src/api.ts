@@ -11,21 +11,21 @@ type ApiResponse<T> = {
 async function apiCall<T>(method: string, body?: unknown): Promise<ApiResponse<T>> {
 
     const config = getConfig();
+    const bearer = config.authToken;
 
-    if (!config.authToken) {
+    if (!bearer) {
 
-        return {ok: false, error: 'Not logged in. Run: logfox login'};
+        return {ok: false, error: 'Not logged in. Run: logfox login or: logfox config set apiKey <key>'};
 
     }
 
     try {
 
-        // express-typed-rpc expects method name in URL path, args as body
         const response = await fetch(`${config.apiUrl}/v1/${method}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${config.authToken}`,
+                'Authorization': `Bearer ${bearer}`,
             },
             body: JSON.stringify(body ?? {}),
         });
@@ -112,38 +112,43 @@ export type LogEntry = {
 
 export type Collector = 'cli' | 'cloudwatch-logs' | 'sdk' | 'vercel' | 'fluentbit';
 
-export async function ingestLogs(teamId: string, appId: string, env: string, logs: LogEntry[]): Promise<ApiResponse<{
+function normalizeEnv(env: string): string {
+
+    if (env === 'prod') return 'production';
+    if (env === 'dev') return 'development';
+
+    return env;
+
+}
+
+export async function ingestLogs(
+    appId: string,
+    env: string,
+    logs: LogEntry[],
+    collector?: Collector,
+): Promise<ApiResponse<{
     success: boolean
     logsIngested: number
 }>> {
 
-    return apiCall('ingestLogs', {teamId, appId, env, logs});
-
-}
-
-/**
- * Ingest logs via the new /v1/ingest endpoint using API key authentication.
- * This is the preferred method for all log ingestion going forward.
- */
-export async function ingestLogsV1(
-    apiKey: string,
-    appId: string,
-    env: string,
-    collector: Collector,
-    logs: LogEntry[],
-): Promise<ApiResponse<{success: boolean; logsIngested: number}>> {
-
     const config = getConfig();
+    const bearer = config.apiKey ?? config.authToken;
+
+    if (!bearer) {
+
+        return {ok: false, error: 'Not logged in. Run: logfox login or: logfox config set apiKey <key>'};
+
+    }
 
     try {
 
-        const response = await fetch(`${config.apiUrl}/v1/ingest`, {
+        const response = await fetch(`${config.apiUrl}/v1/ingestLogs`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`,
+                'Authorization': `Bearer ${bearer}`,
             },
-            body: JSON.stringify({appId, env, collector, logs}),
+            body: JSON.stringify({appId, env: normalizeEnv(env), logs, collector}),
         });
 
         if (!response.ok) {
