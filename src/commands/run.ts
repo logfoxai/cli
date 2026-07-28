@@ -153,14 +153,7 @@ export async function run(command: string[], options: RunOptions): Promise<void>
         const logsToSend = logBuffer;
         logBuffer = [];
 
-        const appId = app?.id;
-
-        if (!appId) {
-
-            console.error('[logfox] Cannot ingest logs without an app id');
-            return;
-
-        }
+        const appId = app?.id ?? appName;
 
         const result = await api.ingestLogs(appId, env, logsToSend, 'cli');
 

@@ -8,18 +8,10 @@ type ApiResponse<T> = {
     error: string
 };
 
-function getBearerToken(): string | undefined {
-
-    const config = getConfig();
-
-    return config.apiKey ?? config.authToken;
-
-}
-
 async function apiCall<T>(method: string, body?: unknown): Promise<ApiResponse<T>> {
 
     const config = getConfig();
-    const bearer = getBearerToken();
+    const bearer = config.authToken;
 
     if (!bearer) {
 
@@ -139,6 +131,47 @@ export async function ingestLogs(
     logsIngested: number
 }>> {
 
-    return apiCall('ingestLogs', {appId, env: normalizeEnv(env), logs, collector});
+    const config = getConfig();
+    const bearer = config.apiKey ?? config.authToken;
+
+    if (!bearer) {
+
+        return {ok: false, error: 'Not logged in. Run: logfox login or: logfox config set apiKey <key>'};
+
+    }
+
+    try {
+
+        const response = await fetch(`${config.apiUrl}/v1/ingestLogs`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${bearer}`,
+            },
+            body: JSON.stringify({appId, env: normalizeEnv(env), logs, collector}),
+        });
+
+        if (!response.ok) {
+
+            const text = await response.text();
+            return {ok: false, error: `API error: ${response.status} ${text}`};
+
+        }
+
+        const data = await response.json() as {success: boolean; logsIngested: number; error?: string};
+
+        if ('error' in data && data.error) {
+
+            return {ok: false, error: data.error};
+
+        }
+
+        return {ok: true, data};
+
+    } catch (err) {
+
+        return {ok: false, error: `Request failed: ${err}`};
+
+    }
 
 }
