@@ -26,7 +26,7 @@
   "devDependencies": {
     "@types/node": "^24.13.2",
     "tsx": "4.20.5",
-    "typescript": "5.8.3"
+    "typescript": "5.9.3"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch-logs": "3.997.0",
