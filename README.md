@@ -62,6 +62,15 @@ logfox config:set appUrl http://localhost:4000
 logfox login
 ```
 
+Regenerate the typed API client from a running api-service mount (see [api-service](https://github.com/logfoxai/api-service)):
+
+```bash
+npm run generate:api   # default: http://127.0.0.1:3000/v1
+LOGFOX_CALLSPEC_URL=https://api.dev.logfox.ai/v1 npm run generate:api
+```
+
+`src/generated/api.ts` is gitignored — `prebuild` runs codegen before `tsc`.
+
 ## Commits & releases
 
 [AutoRel](https://github.com/mhweiner/autorel). Conventional commits — see the [commit format](https://github.com/mhweiner/autorel/blob/main/docs/commit-format.md).

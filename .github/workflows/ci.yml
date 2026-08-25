@@ -20,6 +20,12 @@ jobs:
         node-version: [20, 22, 24]
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        if: ${{ vars.LOGFOX_CALLSPEC_URL == '' }}
+        with:
+          repository: logfoxai/api-service
+          path: api-service
+          ref: feat/callspec-exports
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
@@ -31,4 +37,26 @@ jobs:
           echo "@logfoxai:registry=https://npm.pkg.github.com/" > .npmrc
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
       - run: npm ci
+      - name: Emit callspec for CI
+        if: ${{ vars.LOGFOX_CALLSPEC_URL == '' }}
+        working-directory: api-service
+        run: |
+          npm ci
+          npx tsx -e "
+          import {writeFileSync} from 'fs';
+          import {emitCallspec} from 'callspec/document';
+          import {api} from './src/spec.ts';
+          writeFileSync('callspec.json', JSON.stringify(emitCallspec(api.routes, {
+            title: api.meta.title ?? 'Logfox API',
+            version: api.meta.version ?? '1.0.0',
+            basePath: '/v1',
+            description: api.meta.intro,
+            exports: api.exports,
+            visibility: 'all',
+          }), null, 2) + '\n');
+          "
+      - name: Generate API client
+        run: npm run generate:api
+        env:
+          LOGFOX_CALLSPEC_URL: ${{ vars.LOGFOX_CALLSPEC_URL || format('{0}/api-service/callspec.json', github.workspace) }}
       - run: npm run build
