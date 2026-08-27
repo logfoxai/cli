@@ -62,6 +62,16 @@ logfox config:set appUrl http://localhost:4000
 logfox login
 ```
 
+Regenerate the typed RPC client from the committed CI snapshot (`scripts/ci/callspec.json`) or a live api-service mount:
+
+```bash
+npm run generate:api
+LOGFOX_CALLSPEC_URL=https://api.dev.logfox.ai/v1 npm run generate:api
+LOGFOX_CALLSPEC_URL=../server/callspec.json npm run generate:api   # sibling server checkout
+```
+
+`src/generated/api.ts` is gitignored — `prebuild` runs codegen before `tsc`.
+
 ## Commits & releases
 
 [AutoRel](https://github.com/mhweiner/autorel). Conventional commits — see the [commit format](https://github.com/mhweiner/autorel/blob/main/docs/commit-format.md).

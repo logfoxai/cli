@@ -1,4 +1,17 @@
+import {
+    ApiClient,
+    App,
+    IngestLogsInput,
+    IngestLogsInputLogsItem,
+    Team,
+} from './generated/api';
 import {getConfig} from './config';
+
+export type {App, Team};
+
+export type LogEntry = IngestLogsInputLogsItem & {
+    data?: Record<string, unknown>
+};
 
 type ApiResponse<T> = {
     ok: true
@@ -8,116 +21,125 @@ type ApiResponse<T> = {
     error: string
 };
 
-async function apiCall<T>(method: string, body?: unknown): Promise<ApiResponse<T>> {
+export type Collector = 'cli' | 'cloudwatch-logs' | 'sdk' | 'vercel' | 'fluentbit';
+
+function createClient(): ApiClient | undefined {
 
     const config = getConfig();
-    const bearer = config.authToken;
+    const bearer = config.apiKey ?? config.authToken;
 
-    if (!bearer) {
+    if (!bearer) return undefined;
 
-        return {ok: false, error: 'Not logged in. Run: logfox login or: logfox config set apiKey <key>'};
-
-    }
-
-    try {
-
-        const response = await fetch(`${config.apiUrl}/v1/${method}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${bearer}`,
-            },
-            body: JSON.stringify(body ?? {}),
-        });
-
-        if (!response.ok) {
-
-            const text = await response.text();
-            return {ok: false, error: `API error: ${response.status} ${text}`};
-
-        }
-
-        const data = await response.json() as T & {error?: {message?: string}};
-
-        if ('error' in data && data.error) {
-
-            return {ok: false, error: data.error.message || String(data.error)};
-
-        }
-
-        return {ok: true, data};
-
-    } catch (err) {
-
-        return {ok: false, error: `Request failed: ${err}`};
-
-    }
+    return new ApiClient({
+        baseUrl: config.apiUrl,
+        headers: {
+            Authorization: `Bearer ${bearer}`,
+            'Content-Type': 'application/json',
+        },
+    });
 
 }
 
-export type App = {
-    id: string
-    teamId: string
-    name: string
-    createdByUserId?: string
-    createdAt: string | {__type: string; value: string}
-    updatedAt: string | {__type: string; value: string}
-};
+function formatError(code: string, data?: unknown): string {
 
-export type Team = {
-    id: string
-    name: string
-};
+    if (data && typeof data === 'object' && data !== null && 'message' in data) {
+
+        const message = (data as {message?: string}).message;
+
+        if (message) return message;
+
+    }
+
+    return code;
+
+}
+
+function notLoggedIn(): ApiResponse<never> {
+
+    return {ok: false, error: 'Not logged in. Run: logfox login or: logfox config set apiKey <key>'};
+
+}
+
+function normalizeEnv(env: string): IngestLogsInput['env'] {
+
+    if (env === 'prod') return 'production';
+    if (env === 'dev') return 'development';
+
+    return env as IngestLogsInput['env'];
+
+}
 
 export async function whoami(): Promise<ApiResponse<{id: string; email: string}>> {
 
-    const result = await apiCall<{user: {id: string; email: string}}>('whoami');
+    const client = createClient();
 
-    if (!result.ok) return result;
+    if (!client) return notLoggedIn();
 
-    return {ok: true, data: result.data.user};
+    const result = await client.whoami();
+
+    if (result.ok) return {ok: true, data: result.value.user};
+
+    return {ok: false, error: formatError(result.code, 'data' in result ? result.data : undefined)};
 
 }
 
 export async function getMyTeams(): Promise<ApiResponse<Team[]>> {
 
-    return apiCall('getMyTeams');
+    const client = createClient();
+
+    if (!client) return notLoggedIn();
+
+    const result = await client.getMyTeams();
+
+    if (result.ok) return {ok: true, data: result.value};
+
+    return {ok: false, error: formatError(result.code, 'data' in result ? result.data : undefined)};
 
 }
 
-export async function searchApps(params: {teamId: string; name?: string; createdByUserId?: string}): Promise<ApiResponse<App[]>> {
+export async function searchApps(params: {
+    teamId: string
+    name?: string
+    createdByUserId?: string
+}): Promise<ApiResponse<App[]>> {
 
-    return apiCall('searchApps', params);
+    const client = createClient();
+
+    if (!client) return notLoggedIn();
+
+    const result = await client.searchApps(params);
+
+    if (result.ok) return {ok: true, data: result.value};
+
+    return {ok: false, error: formatError(result.code, 'data' in result ? result.data : undefined)};
 
 }
 
 export async function createApp(params: {teamId: string; name: string}): Promise<ApiResponse<App>> {
 
-    return apiCall('createApp', params);
+    const client = createClient();
+
+    if (!client) return notLoggedIn();
+
+    const result = await client.createApp(params);
+
+    if (result.ok) return {ok: true, data: result.value};
+
+    return {ok: false, error: formatError(result.code, 'data' in result ? result.data : undefined)};
 
 }
 
 export async function deleteApp(appId: string, teamId: string): Promise<ApiResponse<void>> {
 
-    return apiCall('deleteApp', {appId, teamId});
+    const client = createClient();
 
-}
+    if (!client) return notLoggedIn();
 
-export type LogEntry = {
-    timestamp: number
-    level?: number
-    message: string
-    data?: Record<string, unknown>
-};
+    const result = await client.deleteApp({appId, teamId});
 
-export type Collector = 'cli' | 'cloudwatch-logs' | 'sdk' | 'vercel' | 'fluentbit';
+    if (result.ok) return {ok: true, data: undefined};
 
-function normalizeEnv(env: string): string {
-
-    if (env === 'prod') return 'production';
-    if (env === 'dev') return 'development';
-
-    return env;
+    return {ok: false, error: formatError(result.code, 'data' in result ? result.data : undefined)};
 
 }
 
@@ -131,47 +153,25 @@ export async function ingestLogs(
     logsIngested: number
 }>> {
 
-    const config = getConfig();
-    const bearer = config.apiKey ?? config.authToken;
+    const client = createClient();
 
-    if (!bearer) {
+    if (!client) return notLoggedIn();
 
-        return {ok: false, error: 'Not logged in. Run: logfox login or: logfox config set apiKey <key>'};
+    const result = await client.ingestLogs({
+        appId,
+        env: normalizeEnv(env),
+        logs,
+        collector,
+    });
 
-    }
+    if (result.ok) return {ok: true, data: result.value};
 
-    try {
+    if (result.code === 'LOG_INGEST_FAILED') {
 
-        const response = await fetch(`${config.apiUrl}/v1/ingestLogs`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${bearer}`,
-            },
-            body: JSON.stringify({appId, env: normalizeEnv(env), logs, collector}),
-        });
-
-        if (!response.ok) {
-
-            const text = await response.text();
-            return {ok: false, error: `API error: ${response.status} ${text}`};
-
-        }
-
-        const data = await response.json() as {success: boolean; logsIngested: number; error?: string};
-
-        if ('error' in data && data.error) {
-
-            return {ok: false, error: data.error};
-
-        }
-
-        return {ok: true, data};
-
-    } catch (err) {
-
-        return {ok: false, error: `Request failed: ${err}`};
+        return {ok: false, error: result.data.error};
 
     }
+
+    return {ok: false, error: formatError(result.code, 'data' in result ? result.data : undefined)};
 
 }

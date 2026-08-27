@@ -18,6 +18,8 @@ jobs:
       fail-fast: false
       matrix:
         node-version: [20, 22, 24]
+    env:
+      LOGFOX_CALLSPEC_URL: ${{ vars.LOGFOX_CALLSPEC_URL || format('{0}/scripts/ci/callspec.json', github.workspace) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v6
@@ -31,4 +33,6 @@ jobs:
           echo "@logfoxai:registry=https://npm.pkg.github.com/" > .npmrc
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
       - run: npm ci
+      - name: Generate API client
+        run: npm run generate:api
       - run: npm run build

@@ -1,0 +1,6430 @@
+{
+  "callspec": "2.0",
+  "info": {
+    "title": "Logfox API",
+    "version": "1.0.0",
+    "description": "Logfox observability API — ingest logs, search logs and issues, and read apps and notification rules. Team API key or session Bearer required on private routes."
+  },
+  "exports": {
+    "app": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "teamId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "createdByUserId": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "teamId",
+        "name",
+        "createdAt",
+        "updatedAt"
+      ],
+      "additionalProperties": false
+    },
+    "deliveryMethod": {
+      "type": "string",
+      "enum": [
+        "email",
+        "webhook",
+        "slack",
+        "discord",
+        "teams",
+        "github"
+      ]
+    },
+    "deliveryMethodConfig": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "userIds": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string"
+            },
+            "headers": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            },
+            "method": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "url"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "webhookUrl": {
+              "type": "string"
+            },
+            "channel": {
+              "type": "string"
+            },
+            "username": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "webhookUrl"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "webhookUrl": {
+              "type": "string",
+              "minLength": 50
+            },
+            "username": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "webhookUrl"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "webhookUrl": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "webhookUrl"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "repository": {
+              "type": "string"
+            },
+            "issueLabels": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "assignees": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "repository"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "discordDeliveryMethodConfig": {
+      "type": "object",
+      "properties": {
+        "webhookUrl": {
+          "type": "string",
+          "minLength": 50
+        },
+        "username": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "webhookUrl"
+      ],
+      "additionalProperties": false
+    },
+    "emailDeliveryMethodConfig": {
+      "type": "object",
+      "properties": {
+        "userIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "env": {
+      "oneOf": [
+        {
+          "const": "production"
+        },
+        {
+          "const": "staging"
+        },
+        {
+          "const": "development"
+        },
+        {
+          "const": "qa"
+        },
+        {
+          "const": "local"
+        },
+        {
+          "const": "test"
+        }
+      ]
+    },
+    "githubDeliveryMethodConfig": {
+      "type": "object",
+      "properties": {
+        "repository": {
+          "type": "string"
+        },
+        "issueLabels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "assignees": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "repository"
+      ],
+      "additionalProperties": false
+    },
+    "ingestLogEntry": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "number"
+        },
+        "level": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "timestamp",
+        "message"
+      ]
+    },
+    "issue": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "teamId": {
+          "type": "string"
+        },
+        "appId": {
+          "type": "string"
+        },
+        "env": {
+          "oneOf": [
+            {
+              "const": "production"
+            },
+            {
+              "const": "staging"
+            },
+            {
+              "const": "development"
+            },
+            {
+              "const": "qa"
+            },
+            {
+              "const": "local"
+            },
+            {
+              "const": "test"
+            }
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "closed",
+            "ignored"
+          ]
+        },
+        "isMuted": {
+          "type": "boolean"
+        },
+        "level": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "message": {
+          "type": "string"
+        },
+        "ftsBlob": {
+          "type": "string"
+        },
+        "rawLog": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "appId": {
+              "type": "string"
+            },
+            "teamId": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "level": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 7
+            },
+            "data": {
+              "type": "object",
+              "properties": {}
+            },
+            "ftsBlob": {
+              "type": "string"
+            },
+            "env": {
+              "oneOf": [
+                {
+                  "const": "production"
+                },
+                {
+                  "const": "staging"
+                },
+                {
+                  "const": "development"
+                },
+                {
+                  "const": "qa"
+                },
+                {
+                  "const": "local"
+                },
+                {
+                  "const": "test"
+                }
+              ]
+            },
+            "rawPayload": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "properties": {}
+                }
+              ]
+            },
+            "collector": {
+              "type": "string"
+            },
+            "time": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "id",
+            "appId",
+            "teamId",
+            "message",
+            "level",
+            "env",
+            "time"
+          ],
+          "additionalProperties": false
+        },
+        "occurrences": {
+          "type": "number"
+        },
+        "lastOccurrence": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "dateClosed": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "closedByUserId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "teamId",
+        "appId",
+        "env",
+        "status",
+        "isMuted",
+        "level",
+        "message",
+        "occurrences",
+        "lastOccurrence",
+        "createdAt"
+      ],
+      "additionalProperties": false
+    },
+    "issueStatus": {
+      "type": "string",
+      "enum": [
+        "open",
+        "closed",
+        "ignored"
+      ]
+    },
+    "log": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "appId": {
+          "type": "string"
+        },
+        "teamId": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "level": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "data": {
+          "type": "object",
+          "properties": {}
+        },
+        "ftsBlob": {
+          "type": "string"
+        },
+        "env": {
+          "oneOf": [
+            {
+              "const": "production"
+            },
+            {
+              "const": "staging"
+            },
+            {
+              "const": "development"
+            },
+            {
+              "const": "qa"
+            },
+            {
+              "const": "local"
+            },
+            {
+              "const": "test"
+            }
+          ]
+        },
+        "rawPayload": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "properties": {}
+            }
+          ]
+        },
+        "collector": {
+          "type": "string"
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "appId",
+        "teamId",
+        "message",
+        "level",
+        "env",
+        "time"
+      ],
+      "additionalProperties": false
+    },
+    "logLevel": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 7
+    },
+    "notificationFrequency": {
+      "type": "string",
+      "enum": [
+        "hourly",
+        "daily",
+        "weekly"
+      ]
+    },
+    "notificationRule": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "teamId": {
+          "type": "string"
+        },
+        "appIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 16,
+            "maxLength": 16
+          },
+          "minItems": 1
+        },
+        "envs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "level": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "deliveryMethodType": {
+          "type": "string",
+          "enum": [
+            "email",
+            "webhook",
+            "slack",
+            "discord",
+            "teams",
+            "github"
+          ]
+        },
+        "deliveryMethodConfig": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "userIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string"
+                },
+                "headers": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": false
+                },
+                "method": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "url"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "webhookUrl": {
+                  "type": "string"
+                },
+                "channel": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "webhookUrl"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "webhookUrl": {
+                  "type": "string",
+                  "minLength": 50
+                },
+                "username": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "webhookUrl"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "webhookUrl": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "webhookUrl"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "repository": {
+                  "type": "string"
+                },
+                "issueLabels": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "assignees": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "repository"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "frequency": {
+          "type": "string",
+          "enum": [
+            "hourly",
+            "daily",
+            "weekly"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "teamId",
+        "level",
+        "deliveryMethodType",
+        "deliveryMethodConfig",
+        "frequency"
+      ],
+      "additionalProperties": false
+    },
+    "slackDeliveryMethodConfig": {
+      "type": "object",
+      "properties": {
+        "webhookUrl": {
+          "type": "string"
+        },
+        "channel": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "webhookUrl"
+      ],
+      "additionalProperties": false
+    },
+    "sortOrder": {
+      "type": "string",
+      "enum": [
+        "asc",
+        "desc"
+      ]
+    },
+    "team": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "website": {
+          "type": "string"
+        },
+        "apiKey": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "createdAt",
+        "apiKey"
+      ],
+      "additionalProperties": false
+    },
+    "teamsDeliveryMethodConfig": {
+      "type": "object",
+      "properties": {
+        "webhookUrl": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "webhookUrl"
+      ],
+      "additionalProperties": false
+    },
+    "userPublicSafe": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "role": {
+          "oneOf": [
+            {
+              "const": "admin"
+            },
+            {
+              "const": "user"
+            }
+          ]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "avatar": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "const": null
+            }
+          ]
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "role",
+        "createdAt",
+        "firstName",
+        "lastName"
+      ],
+      "additionalProperties": false
+    },
+    "webhookDeliveryMethodConfig": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "headers": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "method": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "routes": {
+    "analyzeError": {
+      "name": "analyzeError",
+      "path": "/v1/analyzeError",
+      "method": "POST",
+      "summary": "Analyze error",
+      "description": "",
+      "tags": [
+        "logs"
+      ],
+      "auth": "bearer",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "appId": {
+            "type": "string"
+          },
+          "teamId": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "level": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 7
+          },
+          "data": {
+            "type": "object",
+            "properties": {}
+          },
+          "ftsBlob": {
+            "type": "string"
+          },
+          "env": {
+            "oneOf": [
+              {
+                "const": "production"
+              },
+              {
+                "const": "staging"
+              },
+              {
+                "const": "development"
+              },
+              {
+                "const": "qa"
+              },
+              {
+                "const": "local"
+              },
+              {
+                "const": "test"
+              }
+            ]
+          },
+          "rawPayload": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "properties": {}
+              }
+            ]
+          },
+          "collector": {
+            "type": "string"
+          },
+          "time": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "appId",
+          "teamId",
+          "message",
+          "level",
+          "env",
+          "time"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string"
+          },
+          "diagnosis": {
+            "type": "string"
+          },
+          "recommended_solution": {
+            "type": "string"
+          },
+          "logging_improvements": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "summary",
+          "diagnosis",
+          "recommended_solution",
+          "logging_improvements"
+        ],
+        "additionalProperties": false
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "ANALYSIS_FAILED": {
+          "status": 400
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "clearBackendCache": {
+      "name": "clearBackendCache",
+      "path": "/v1/clearBackendCache",
+      "method": "POST",
+      "summary": "Clear backend cache",
+      "description": "",
+      "tags": [
+        "admin",
+        "caching"
+      ],
+      "auth": "bearer",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "null"
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "closeAllIssues": {
+      "name": "closeAllIssues",
+      "path": "/v1/closeAllIssues",
+      "method": "POST",
+      "summary": "Close all issues",
+      "description": "",
+      "tags": [
+        "issues"
+      ],
+      "auth": "bearer",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "teamId"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "updatedCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "updatedCount"
+        ],
+        "additionalProperties": false
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "createApp": {
+      "name": "createApp",
+      "path": "/v1/createApp",
+      "method": "POST",
+      "summary": "Create app",
+      "description": "",
+      "tags": [
+        "apps"
+      ],
+      "auth": "bearer",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 50
+          },
+          "teamId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "teamId"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "teamId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "createdByUserId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "teamId",
+          "name",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "APP_ALREADY_EXISTS": {
+          "status": 400,
+          "data": {},
+          "dataRequired": true
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "createTeam": {
+      "name": "createTeam",
+      "path": "/v1/createTeam",
+      "method": "POST",
+      "summary": "Create team",
+      "description": "",
+      "tags": [
+        "teams"
+      ],
+      "auth": "bearer",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "website": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "website": {
+            "type": "string"
+          },
+          "apiKey": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "createdAt",
+          "apiKey"
+        ],
+        "additionalProperties": false
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "createUserSession": {
+      "name": "createUserSession",
+      "path": "/v1/createUserSession",
+      "method": "POST",
+      "summary": "Create user session",
+      "description": "",
+      "tags": [
+        "auth"
+      ],
+      "auth": "none",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "role": {
+                "oneOf": [
+                  {
+                    "const": "admin"
+                  },
+                  {
+                    "const": "user"
+                  }
+                ]
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "avatar": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "const": null
+                  }
+                ]
+              },
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "email",
+              "role",
+              "createdAt",
+              "firstName",
+              "lastName"
+            ],
+            "additionalProperties": false
+          },
+          "teams": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "website": {
+                  "type": "string"
+                },
+                "apiKey": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "createdAt",
+                "apiKey"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "token",
+          "user",
+          "teams"
+        ],
+        "additionalProperties": false
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "deleteApp": {
+      "name": "deleteApp",
+      "path": "/v1/deleteApp",
+      "method": "POST",
+      "summary": "Delete app",
+      "description": "",
+      "tags": [
+        "apps"
+      ],
+      "auth": "bearer",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {
+          "appId": {
+            "type": "string"
+          },
+          "teamId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "appId",
+          "teamId"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "null"
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "destroyUserSessions": {
+      "name": "destroyUserSessions",
+      "path": "/v1/destroyUserSessions",
+      "method": "POST",
+      "summary": "Destroy user sessions",
+      "description": "",
+      "tags": [
+        "auth"
+      ],
+      "auth": "bearer",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "null"
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "getAllUsers": {
+      "name": "getAllUsers",
+      "path": "/v1/getAllUsers",
+      "method": "POST",
+      "summary": "Get all users",
+      "description": "",
+      "tags": [
+        "admin",
+        "users"
+      ],
+      "auth": "bearer",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "role": {
+              "oneOf": [
+                {
+                  "const": "admin"
+                },
+                {
+                  "const": "user"
+                }
+              ]
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "avatar": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "const": null
+                }
+              ]
+            },
+            "firstName": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "email",
+            "role",
+            "createdAt",
+            "firstName",
+            "lastName"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "getIssueById": {
+      "name": "getIssueById",
+      "path": "/v1/getIssueById",
+      "method": "POST",
+      "summary": "Get issue by ID",
+      "description": "",
+      "tags": [
+        "issues"
+      ],
+      "auth": "bearer",
+      "scope": "public",
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "teamId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "teamId"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "teamId": {
+            "type": "string"
+          },
+          "appId": {
+            "type": "string"
+          },
+          "env": {
+            "oneOf": [
+              {
+                "const": "production"
+              },
+              {
+                "const": "staging"
+              },
+              {
+                "const": "development"
+              },
+              {
+                "const": "qa"
+              },
+              {
+                "const": "local"
+              },
+              {
+                "const": "test"
+              }
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "closed",
+              "ignored"
+            ]
+          },
+          "isMuted": {
+            "type": "boolean"
+          },
+          "level": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 7
+          },
+          "message": {
+            "type": "string"
+          },
+          "ftsBlob": {
+            "type": "string"
+          },
+          "rawLog": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "appId": {
+                "type": "string"
+              },
+              "teamId": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "level": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 7
+              },
+              "data": {
+                "type": "object",
+                "properties": {}
+              },
+              "ftsBlob": {
+                "type": "string"
+              },
+              "env": {
+                "oneOf": [
+                  {
+                    "const": "production"
+                  },
+                  {
+                    "const": "staging"
+                  },
+                  {
+                    "const": "development"
+                  },
+                  {
+                    "const": "qa"
+                  },
+                  {
+                    "const": "local"
+                  },
+                  {
+                    "const": "test"
+                  }
+                ]
+              },
+              "rawPayload": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {}
+                  }
+                ]
+              },
+              "collector": {
+                "type": "string"
+              },
+              "time": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "id",
+              "appId",
+              "teamId",
+              "message",
+              "level",
+              "env",
+              "time"
+            ],
+            "additionalProperties": false
+          },
+          "occurrences": {
+            "type": "number"
+          },
+          "lastOccurrence": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dateClosed": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closedByUserId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "teamId",
+          "appId",
+          "env",
+          "status",
+          "isMuted",
+          "level",
+          "message",
+          "occurrences",
+          "lastOccurrence",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": true
+      }
+    },
+    "getMyTeamMembership": {
+      "name": "getMyTeamMembership",
+      "path": "/v1/getMyTeamMembership",
+      "method": "POST",
+      "summary": "Get my team membership",
+      "description": "",
+      "tags": [
+        "teams"
+      ],
+      "auth": "bearer",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "teamId"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "oneOf": [
+              {
+                "const": "manager"
+              },
+              {
+                "const": "member"
+              }
+            ]
+          }
+        },
+        "required": [
+          "role"
+        ],
+        "additionalProperties": false
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "getMyTeams": {
+      "name": "getMyTeams",
+      "path": "/v1/getMyTeams",
+      "method": "POST",
+      "summary": "Get my teams",
+      "description": "",
+      "tags": [
+        "teams"
+      ],
+      "auth": "bearer",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "website": {
+              "type": "string"
+            },
+            "apiKey": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "createdAt",
+            "apiKey"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "getNotificationRules": {
+      "name": "getNotificationRules",
+      "path": "/v1/getNotificationRules",
+      "method": "POST",
+      "summary": "Get notification rules",
+      "description": "",
+      "tags": [
+        "notifications"
+      ],
+      "auth": "bearer",
+      "scope": "public",
+      "input": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "teamId"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "teamId": {
+              "type": "string"
+            },
+            "appIds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 16,
+                "maxLength": 16
+              },
+              "minItems": 1
+            },
+            "envs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "level": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 7
+            },
+            "deliveryMethodType": {
+              "type": "string",
+              "enum": [
+                "email",
+                "webhook",
+                "slack",
+                "discord",
+                "teams",
+                "github"
+              ]
+            },
+            "deliveryMethodConfig": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "userIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string"
+                    },
+                    "headers": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": false
+                    },
+                    "method": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "url"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "webhookUrl": {
+                      "type": "string"
+                    },
+                    "channel": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "webhookUrl"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "webhookUrl": {
+                      "type": "string",
+                      "minLength": 50
+                    },
+                    "username": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "webhookUrl"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "webhookUrl": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "webhookUrl"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "repository": {
+                      "type": "string"
+                    },
+                    "issueLabels": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "assignees": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "repository"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "frequency": {
+              "type": "string",
+              "enum": [
+                "hourly",
+                "daily",
+                "weekly"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "teamId",
+            "level",
+            "deliveryMethodType",
+            "deliveryMethodConfig",
+            "frequency"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": true
+      }
+    },
+    "getNotificationRulesMatchingIssue": {
+      "name": "getNotificationRulesMatchingIssue",
+      "path": "/v1/getNotificationRulesMatchingIssue",
+      "method": "POST",
+      "summary": "Get matching notification rules",
+      "description": "",
+      "tags": [
+        "notifications"
+      ],
+      "auth": "bearer",
+      "scope": "public",
+      "input": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string"
+          },
+          "level": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 7
+          },
+          "appId": {
+            "type": "string"
+          },
+          "env": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "teamId",
+          "level",
+          "appId",
+          "env"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "teamId": {
+              "type": "string"
+            },
+            "appIds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 16,
+                "maxLength": 16
+              },
+              "minItems": 1
+            },
+            "envs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "level": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 7
+            },
+            "deliveryMethodType": {
+              "type": "string",
+              "enum": [
+                "email",
+                "webhook",
+                "slack",
+                "discord",
+                "teams",
+                "github"
+              ]
+            },
+            "deliveryMethodConfig": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "userIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string"
+                    },
+                    "headers": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": false
+                    },
+                    "method": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "url"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "webhookUrl": {
+                      "type": "string"
+                    },
+                    "channel": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "webhookUrl"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "webhookUrl": {
+                      "type": "string",
+                      "minLength": 50
+                    },
+                    "username": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "webhookUrl"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "webhookUrl": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "webhookUrl"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "repository": {
+                      "type": "string"
+                    },
+                    "issueLabels": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "assignees": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "repository"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "frequency": {
+              "type": "string",
+              "enum": [
+                "hourly",
+                "daily",
+                "weekly"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "teamId",
+            "level",
+            "deliveryMethodType",
+            "deliveryMethodConfig",
+            "frequency"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": true
+      }
+    },
+    "getNumOpenIssues": {
+      "name": "getNumOpenIssues",
+      "path": "/v1/getNumOpenIssues",
+      "method": "POST",
+      "summary": "Get open issue counts",
+      "description": "",
+      "tags": [
+        "issues"
+      ],
+      "auth": "bearer",
+      "scope": "public",
+      "input": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "teamId"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "byEnv": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "env": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "env",
+                "count"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "productionBySeverity": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "level": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 7
+                },
+                "count": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "level",
+                "count"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "byEnvSeverity": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "env": {
+                  "type": "string"
+                },
+                "level": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 7
+                },
+                "count": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "env",
+                "level",
+                "count"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "byEnv",
+          "productionBySeverity",
+          "byEnvSeverity"
+        ],
+        "additionalProperties": false
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": true
+      }
+    },
+    "getOpenIssuesByApp": {
+      "name": "getOpenIssuesByApp",
+      "path": "/v1/getOpenIssuesByApp",
+      "method": "POST",
+      "summary": "Get open issues by app",
+      "description": "",
+      "tags": [
+        "issues"
+      ],
+      "auth": "bearer",
+      "scope": "public",
+      "input": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "teamId"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "appId": {
+              "type": "string"
+            },
+            "env": {
+              "type": "string"
+            },
+            "count": {
+              "type": "number"
+            },
+            "emergency": {
+              "type": "number"
+            },
+            "alert": {
+              "type": "number"
+            },
+            "critical": {
+              "type": "number"
+            },
+            "error": {
+              "type": "number"
+            },
+            "warning": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "appId",
+            "env",
+            "count",
+            "emergency",
+            "alert",
+            "critical",
+            "error",
+            "warning"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": true
+      }
+    },
+    "getRecipientsByTeamId": {
+      "name": "getRecipientsByTeamId",
+      "path": "/v1/getRecipientsByTeamId",
+      "method": "POST",
+      "summary": "Get recipients by team",
+      "description": "",
+      "tags": [
+        "users",
+        "teams"
+      ],
+      "auth": "bearer",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "teamId"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "firstName": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "email",
+            "firstName",
+            "lastName"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "getTeamMemberProfile": {
+      "name": "getTeamMemberProfile",
+      "path": "/v1/getTeamMemberProfile",
+      "method": "POST",
+      "summary": "Get team member profile",
+      "description": "",
+      "tags": [
+        "users",
+        "teams"
+      ],
+      "auth": "bearer",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "teamId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId",
+          "teamId"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "avatar": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "const": null
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "firstName",
+          "lastName"
+        ],
+        "additionalProperties": false
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "ignoreAllIssues": {
+      "name": "ignoreAllIssues",
+      "path": "/v1/ignoreAllIssues",
+      "method": "POST",
+      "summary": "Ignore all issues",
+      "description": "",
+      "tags": [
+        "issues"
+      ],
+      "auth": "bearer",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "teamId"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "updatedCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "updatedCount"
+        ],
+        "additionalProperties": false
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "ingestLogs": {
+      "name": "ingestLogs",
+      "path": "/v1/ingestLogs",
+      "method": "POST",
+      "summary": "Ingest logs",
+      "description": "",
+      "tags": [
+        "logs"
+      ],
+      "auth": "bearer",
+      "scope": "public",
+      "input": {
+        "type": "object",
+        "properties": {
+          "appId": {
+            "type": "string"
+          },
+          "env": {
+            "oneOf": [
+              {
+                "const": "production"
+              },
+              {
+                "const": "staging"
+              },
+              {
+                "const": "development"
+              },
+              {
+                "const": "qa"
+              },
+              {
+                "const": "local"
+              },
+              {
+                "const": "test"
+              }
+            ]
+          },
+          "collector": {
+            "type": "string"
+          },
+          "logs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "timestamp": {
+                  "type": "number"
+                },
+                "level": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 7
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "timestamp",
+                "message"
+              ]
+            }
+          }
+        },
+        "required": [
+          "appId",
+          "env",
+          "logs"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "logsIngested": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "success",
+          "logsIngested"
+        ],
+        "additionalProperties": false
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "APP_NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "appId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "appId"
+            ],
+            "additionalProperties": false
+          },
+          "dataRequired": true
+        },
+        "LOG_INGEST_FAILED": {
+          "status": 400,
+          "data": {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "error"
+            ],
+            "additionalProperties": false
+          },
+          "dataRequired": true
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "muteAllIssues": {
+      "name": "muteAllIssues",
+      "path": "/v1/muteAllIssues",
+      "method": "POST",
+      "summary": "Mute all issues",
+      "description": "",
+      "tags": [
+        "issues"
+      ],
+      "auth": "bearer",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string"
+          },
+          "isMuted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "teamId",
+          "isMuted"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "updatedCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "updatedCount"
+        ],
+        "additionalProperties": false
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "register": {
+      "name": "register",
+      "path": "/v1/register",
+      "method": "POST",
+      "summary": "Register a new account",
+      "description": "",
+      "tags": [
+        "auth",
+        "users"
+      ],
+      "auth": "none",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {
+          "teamName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "website": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uri"
+              },
+              {
+                "const": ""
+              },
+              {
+                "const": " "
+              }
+            ]
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 100
+          },
+          "firstName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "teamName",
+          "email",
+          "password",
+          "firstName",
+          "lastName"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "team": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "website": {
+                "type": "string"
+              },
+              "apiKey": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "createdAt",
+              "apiKey"
+            ],
+            "additionalProperties": false
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "role": {
+                "oneOf": [
+                  {
+                    "const": "admin"
+                  },
+                  {
+                    "const": "user"
+                  }
+                ]
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "avatar": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "const": null
+                  }
+                ]
+              },
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "email",
+              "role",
+              "createdAt",
+              "firstName",
+              "lastName"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "token",
+          "team",
+          "user"
+        ],
+        "additionalProperties": false
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "USER_ALREADY_EXISTS": {
+          "status": 400
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "renameApp": {
+      "name": "renameApp",
+      "path": "/v1/renameApp",
+      "method": "POST",
+      "summary": "Rename app",
+      "description": "",
+      "tags": [
+        "apps"
+      ],
+      "auth": "bearer",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 50
+          },
+          "teamId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "teamId"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "teamId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "createdByUserId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "teamId",
+          "name",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "resetPassword": {
+      "name": "resetPassword",
+      "path": "/v1/resetPassword",
+      "method": "POST",
+      "summary": "Reset password",
+      "description": "",
+      "tags": [
+        "auth"
+      ],
+      "auth": "none",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "token",
+          "password"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "null"
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOKEN_NOT_FOUND": {
+          "status": 400
+        },
+        "TOKEN_EXPIRED": {
+          "status": 400
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "searchApps": {
+      "name": "searchApps",
+      "path": "/v1/searchApps",
+      "method": "POST",
+      "summary": "Search apps",
+      "description": "",
+      "tags": [
+        "apps"
+      ],
+      "auth": "bearer",
+      "scope": "public",
+      "input": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "createdByUserId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "teamId"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "teamId": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "createdByUserId": {
+              "type": "string"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "id",
+            "teamId",
+            "name",
+            "createdAt",
+            "updatedAt"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": true
+      }
+    },
+    "searchIssues": {
+      "name": "searchIssues",
+      "path": "/v1/searchIssues",
+      "method": "POST",
+      "summary": "Search issues",
+      "description": "",
+      "tags": [
+        "issues"
+      ],
+      "auth": "bearer",
+      "scope": "public",
+      "input": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string"
+          },
+          "vector": {
+            "type": "string"
+          },
+          "appIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "closed",
+              "ignored"
+            ]
+          },
+          "isMuted": {
+            "type": "boolean"
+          },
+          "env": {
+            "type": "string"
+          },
+          "page": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "teamId",
+          "status",
+          "env"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "teamId": {
+              "type": "string"
+            },
+            "appId": {
+              "type": "string"
+            },
+            "env": {
+              "oneOf": [
+                {
+                  "const": "production"
+                },
+                {
+                  "const": "staging"
+                },
+                {
+                  "const": "development"
+                },
+                {
+                  "const": "qa"
+                },
+                {
+                  "const": "local"
+                },
+                {
+                  "const": "test"
+                }
+              ]
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "open",
+                "closed",
+                "ignored"
+              ]
+            },
+            "isMuted": {
+              "type": "boolean"
+            },
+            "level": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 7
+            },
+            "message": {
+              "type": "string"
+            },
+            "ftsBlob": {
+              "type": "string"
+            },
+            "rawLog": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "appId": {
+                  "type": "string"
+                },
+                "teamId": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "level": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 7
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {}
+                },
+                "ftsBlob": {
+                  "type": "string"
+                },
+                "env": {
+                  "oneOf": [
+                    {
+                      "const": "production"
+                    },
+                    {
+                      "const": "staging"
+                    },
+                    {
+                      "const": "development"
+                    },
+                    {
+                      "const": "qa"
+                    },
+                    {
+                      "const": "local"
+                    },
+                    {
+                      "const": "test"
+                    }
+                  ]
+                },
+                "rawPayload": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {}
+                    }
+                  ]
+                },
+                "collector": {
+                  "type": "string"
+                },
+                "time": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "id",
+                "appId",
+                "teamId",
+                "message",
+                "level",
+                "env",
+                "time"
+              ],
+              "additionalProperties": false
+            },
+            "occurrences": {
+              "type": "number"
+            },
+            "lastOccurrence": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "dateClosed": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "closedByUserId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "teamId",
+            "appId",
+            "env",
+            "status",
+            "isMuted",
+            "level",
+            "message",
+            "occurrences",
+            "lastOccurrence",
+            "createdAt"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": true
+      }
+    },
+    "searchLogs": {
+      "name": "searchLogs",
+      "path": "/v1/searchLogs",
+      "method": "POST",
+      "summary": "Search logs",
+      "description": "",
+      "tags": [
+        "logs"
+      ],
+      "auth": "bearer",
+      "scope": "public",
+      "input": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string"
+          },
+          "level": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 7
+          },
+          "levelExclusive": {
+            "type": "boolean"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "vector": {
+            "type": "string"
+          },
+          "appIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "env": {
+            "type": "string"
+          },
+          "page": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "teamId",
+          "env"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "appId": {
+              "type": "string"
+            },
+            "teamId": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "level": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 7
+            },
+            "data": {
+              "type": "object",
+              "properties": {}
+            },
+            "ftsBlob": {
+              "type": "string"
+            },
+            "env": {
+              "oneOf": [
+                {
+                  "const": "production"
+                },
+                {
+                  "const": "staging"
+                },
+                {
+                  "const": "development"
+                },
+                {
+                  "const": "qa"
+                },
+                {
+                  "const": "local"
+                },
+                {
+                  "const": "test"
+                }
+              ]
+            },
+            "rawPayload": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "properties": {}
+                }
+              ]
+            },
+            "collector": {
+              "type": "string"
+            },
+            "time": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "id",
+            "appId",
+            "teamId",
+            "message",
+            "level",
+            "env",
+            "time"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": true
+      }
+    },
+    "sendResetPasswordLink": {
+      "name": "sendResetPasswordLink",
+      "path": "/v1/sendResetPasswordLink",
+      "method": "POST",
+      "summary": "Send password reset link",
+      "description": "",
+      "tags": [
+        "auth"
+      ],
+      "auth": "none",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "null"
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "setNotificationRules": {
+      "name": "setNotificationRules",
+      "path": "/v1/setNotificationRules",
+      "method": "POST",
+      "summary": "Set notification rules",
+      "description": "",
+      "tags": [
+        "notifications"
+      ],
+      "auth": "bearer",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string"
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "teamId": {
+                  "type": "string"
+                },
+                "appIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 16,
+                    "maxLength": 16
+                  },
+                  "minItems": 1
+                },
+                "envs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 1
+                },
+                "level": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 7
+                },
+                "deliveryMethodType": {
+                  "type": "string",
+                  "enum": [
+                    "email",
+                    "webhook",
+                    "slack",
+                    "discord",
+                    "teams",
+                    "github"
+                  ]
+                },
+                "deliveryMethodConfig": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "userIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "url": {
+                          "type": "string"
+                        },
+                        "headers": {
+                          "type": "object",
+                          "properties": {},
+                          "additionalProperties": false
+                        },
+                        "method": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "url"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "webhookUrl": {
+                          "type": "string"
+                        },
+                        "channel": {
+                          "type": "string"
+                        },
+                        "username": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "webhookUrl"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "webhookUrl": {
+                          "type": "string",
+                          "minLength": 50
+                        },
+                        "username": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "webhookUrl"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "webhookUrl": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "webhookUrl"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "repository": {
+                          "type": "string"
+                        },
+                        "issueLabels": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "assignees": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "repository"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "frequency": {
+                  "type": "string",
+                  "enum": [
+                    "hourly",
+                    "daily",
+                    "weekly"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "teamId",
+                "level",
+                "deliveryMethodType",
+                "deliveryMethodConfig",
+                "frequency"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "teamId",
+          "rules"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "teamId": {
+              "type": "string"
+            },
+            "appIds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 16,
+                "maxLength": 16
+              },
+              "minItems": 1
+            },
+            "envs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "level": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 7
+            },
+            "deliveryMethodType": {
+              "type": "string",
+              "enum": [
+                "email",
+                "webhook",
+                "slack",
+                "discord",
+                "teams",
+                "github"
+              ]
+            },
+            "deliveryMethodConfig": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "userIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string"
+                    },
+                    "headers": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": false
+                    },
+                    "method": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "url"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "webhookUrl": {
+                      "type": "string"
+                    },
+                    "channel": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "webhookUrl"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "webhookUrl": {
+                      "type": "string",
+                      "minLength": 50
+                    },
+                    "username": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "webhookUrl"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "webhookUrl": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "webhookUrl"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "repository": {
+                      "type": "string"
+                    },
+                    "issueLabels": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "assignees": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "repository"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "frequency": {
+              "type": "string",
+              "enum": [
+                "hourly",
+                "daily",
+                "weekly"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "teamId",
+            "level",
+            "deliveryMethodType",
+            "deliveryMethodConfig",
+            "frequency"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "updateIssueStatus": {
+      "name": "updateIssueStatus",
+      "path": "/v1/updateIssueStatus",
+      "method": "POST",
+      "summary": "Update issue status",
+      "description": "",
+      "tags": [
+        "issues"
+      ],
+      "auth": "bearer",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {
+          "issueIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "maxItems": 100
+          },
+          "teamId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "closed",
+              "ignored"
+            ]
+          },
+          "isMuted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "issueIds",
+          "teamId"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "teamId": {
+              "type": "string"
+            },
+            "appId": {
+              "type": "string"
+            },
+            "env": {
+              "oneOf": [
+                {
+                  "const": "production"
+                },
+                {
+                  "const": "staging"
+                },
+                {
+                  "const": "development"
+                },
+                {
+                  "const": "qa"
+                },
+                {
+                  "const": "local"
+                },
+                {
+                  "const": "test"
+                }
+              ]
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "open",
+                "closed",
+                "ignored"
+              ]
+            },
+            "isMuted": {
+              "type": "boolean"
+            },
+            "level": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 7
+            },
+            "message": {
+              "type": "string"
+            },
+            "ftsBlob": {
+              "type": "string"
+            },
+            "rawLog": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "appId": {
+                  "type": "string"
+                },
+                "teamId": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "level": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 7
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {}
+                },
+                "ftsBlob": {
+                  "type": "string"
+                },
+                "env": {
+                  "oneOf": [
+                    {
+                      "const": "production"
+                    },
+                    {
+                      "const": "staging"
+                    },
+                    {
+                      "const": "development"
+                    },
+                    {
+                      "const": "qa"
+                    },
+                    {
+                      "const": "local"
+                    },
+                    {
+                      "const": "test"
+                    }
+                  ]
+                },
+                "rawPayload": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {}
+                    }
+                  ]
+                },
+                "collector": {
+                  "type": "string"
+                },
+                "time": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "id",
+                "appId",
+                "teamId",
+                "message",
+                "level",
+                "env",
+                "time"
+              ],
+              "additionalProperties": false
+            },
+            "occurrences": {
+              "type": "number"
+            },
+            "lastOccurrence": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "dateClosed": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "closedByUserId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "teamId",
+            "appId",
+            "env",
+            "status",
+            "isMuted",
+            "level",
+            "message",
+            "occurrences",
+            "lastOccurrence",
+            "createdAt"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "updateProfile": {
+      "name": "updateProfile",
+      "path": "/v1/updateProfile",
+      "method": "POST",
+      "summary": "Update profile",
+      "description": "",
+      "tags": [
+        "users"
+      ],
+      "auth": "bearer",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "phone": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "oneOf": [
+              {
+                "const": "admin"
+              },
+              {
+                "const": "user"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "avatar": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "const": null
+              }
+            ]
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "role",
+          "createdAt",
+          "firstName",
+          "lastName"
+        ],
+        "additionalProperties": false
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "uploadAvatar": {
+      "name": "uploadAvatar",
+      "path": "/v1/uploadAvatar",
+      "method": "POST",
+      "summary": "Upload avatar",
+      "description": "",
+      "tags": [
+        "users"
+      ],
+      "auth": "bearer",
+      "scope": "private",
+      "encoding": "multipart",
+      "input": {
+        "type": "object",
+        "properties": {
+          "avatar": {
+            "type": "string",
+            "format": "binary"
+          }
+        },
+        "required": [
+          "avatar"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "UPLOAD_FAILED": {
+          "status": 400
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "validatePasswordResetToken": {
+      "name": "validatePasswordResetToken",
+      "path": "/v1/validatePasswordResetToken",
+      "method": "POST",
+      "summary": "Validate password reset token",
+      "description": "",
+      "tags": [
+        "auth"
+      ],
+      "auth": "none",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "null"
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOKEN_NOT_FOUND": {
+          "status": 400
+        },
+        "TOKEN_EXPIRED": {
+          "status": 400
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    },
+    "whoami": {
+      "name": "whoami",
+      "path": "/v1/whoami",
+      "method": "POST",
+      "summary": "Who am I",
+      "description": "",
+      "tags": [
+        "auth",
+        "users"
+      ],
+      "auth": "bearer",
+      "scope": "private",
+      "input": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "role": {
+                "oneOf": [
+                  {
+                    "const": "admin"
+                  },
+                  {
+                    "const": "user"
+                  }
+                ]
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "avatar": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "const": null
+                  }
+                ]
+              },
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "email",
+              "role",
+              "createdAt",
+              "firstName",
+              "lastName"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "user"
+        ],
+        "additionalProperties": false
+      },
+      "errors": {
+        "NOT_FOUND": {
+          "status": 404,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "FORBIDDEN": {
+          "status": 403,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "TOO_MANY_REQUESTS": {
+          "status": 429,
+          "data": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        },
+        "SERVICE_UNAVAILABLE": {
+          "status": 503,
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "dataRequired": false
+        }
+      },
+      "mcp": {
+        "enabled": false
+      }
+    }
+  }
+}
