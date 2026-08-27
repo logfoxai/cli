@@ -62,11 +62,12 @@ logfox config:set appUrl http://localhost:4000
 logfox login
 ```
 
-Regenerate the typed API client from a running api-service mount (see [api-service](https://github.com/logfoxai/api-service)):
+Regenerate the typed RPC client from the committed CI snapshot (`scripts/ci/callspec.json`) or a live api-service mount:
 
 ```bash
-npm run generate:api   # default: http://127.0.0.1:3000/v1
+npm run generate:api
 LOGFOX_CALLSPEC_URL=https://api.dev.logfox.ai/v1 npm run generate:api
+LOGFOX_CALLSPEC_URL=../server/callspec.json npm run generate:api   # sibling server checkout
 ```
 
 `src/generated/api.ts` is gitignored — `prebuild` runs codegen before `tsc`.

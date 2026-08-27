@@ -18,7 +18,7 @@
     "access": "public"
   },
   "scripts": {
-    "generate:api": "node scripts/generate-api-client.mjs",
+    "generate:api": "callspec \"${LOGFOX_CALLSPEC_URL:-scripts/ci/callspec.json}\" --output src/generated/api.ts",
     "prebuild": "npm run generate:api",
     "build": "tsc",
     "dev": "tsx src/index.ts",
@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.13.2",
-    "callspec": "3.11.0",
+    "callspec": "^3.12.4",
     "tsx": "4.20.5",
     "typescript": "5.9.3"
   },
@@ -37,7 +37,6 @@
     "@aws-sdk/client-lambda": "3.997.0",
     "@aws-sdk/client-sts": "3.997.0",
     "@inquirer/prompts": "8.3.0",
-    "callspec": "3.11.0",
     "commander": "12.1.0",
     "open": "10.1.0",
     "runtyp": "^2.5.0"
