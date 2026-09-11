@@ -66,7 +66,7 @@ Regenerate the typed RPC client from the committed CI snapshot (`scripts/ci/call
 
 ```bash
 npm run generate:api
-LOGFOX_CALLSPEC_URL=https://api.dev.logfox.ai/v1 npm run generate:api
+LOGFOX_CALLSPEC_URL=https://api.logfox.test/v1 npm run generate:api
 LOGFOX_CALLSPEC_URL=../server/callspec.json npm run generate:api   # sibling server checkout
 ```
 
